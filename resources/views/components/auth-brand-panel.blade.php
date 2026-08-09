@@ -1,6 +1,8 @@
 @php
-    $appName = 'LawDocs';
-    $tagline = 'Precedent-driven document assembly for your practice.';
+    use App\Models\Setting;
+
+    $appName = Setting::get('app_name', 'LawDocs');
+    $tagline = Setting::get('app_tagline', 'Precedent-driven document assembly for your practice.');
 
     // Fixed single theme (deep slate/indigo) — no admin-configurable theme
     // picker, unlike wma-bot's version. Simple, professional, one look.

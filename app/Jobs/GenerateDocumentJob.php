@@ -3,6 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\DocumentRequest;
+use App\Models\Setting;
+use App\Notifications\DocumentGenerationFailedNotification;
 use App\Services\DocxBuilder;
 use App\Services\Generators\GeneratorRegistry;
 use Illuminate\Bus\Queueable;
@@ -11,6 +13,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -62,6 +65,23 @@ class GenerateDocumentJob implements ShouldQueue
                 'status'        => 'failed',
                 'error_message' => $e->getMessage(),
             ]);
+
+            $this->notifyStaff();
+        }
+    }
+
+    private function notifyStaff(): void
+    {
+        $email = Setting::get('staff_notification_email');
+        if (! $email) {
+            return;
+        }
+
+        try {
+            Notification::route('mail', $email)
+                ->notify(new DocumentGenerationFailedNotification($this->documentRequest));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send document generation failure notification', ['error' => $e->getMessage()]);
         }
     }
 }

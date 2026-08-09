@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\SystemSettings;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -12,17 +14,49 @@ class SystemSettingsPageTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_super_admin_can_view_and_save_system_settings(): void
+    private function actingAsSuperAdmin(): User
     {
         Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
         $user = User::factory()->create();
         $user->assignRole('super_admin');
+        $this->actingAs($user);
 
-        $this->actingAs($user)
-            ->get('/admin/system-settings')
-            ->assertOk();
+        return $user;
+    }
+
+    public function test_super_admin_can_view_and_save_system_settings(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        $this->get('/admin/system-settings')->assertOk();
 
         Setting::set('docx_font_family', 'Georgia', 'document');
         $this->assertSame('Georgia', Setting::get('docx_font_family'));
+    }
+
+    public function test_general_appearance_and_email_fields_round_trip_through_the_real_form(): void
+    {
+        $this->actingAsSuperAdmin();
+
+        Livewire::test(SystemSettings::class)
+            ->fillForm([
+                'app_name'                 => 'Acme Legal',
+                'app_tagline'              => 'Wills done right.',
+                'admin_theme'              => 'emerald',
+                'admin_panel_theme_mode'   => 'light',
+                'mail_from_name'           => 'Acme Legal',
+                'mail_from_address'        => 'no-reply@acmelegal.test',
+                'staff_notification_email' => 'staff@acmelegal.test',
+            ])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertSame('Acme Legal', Setting::get('app_name'));
+        $this->assertSame('Wills done right.', Setting::get('app_tagline'));
+        $this->assertSame('emerald', Setting::get('admin_theme'));
+        $this->assertSame('light', Setting::get('admin_panel_theme_mode'));
+        $this->assertSame('Acme Legal', Setting::get('mail_from_name'));
+        $this->assertSame('no-reply@acmelegal.test', Setting::get('mail_from_address'));
+        $this->assertSame('staff@acmelegal.test', Setting::get('staff_notification_email'));
     }
 }

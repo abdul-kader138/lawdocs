@@ -5,8 +5,11 @@ namespace Tests\Feature;
 use App\Jobs\GenerateDocumentJob;
 use App\Models\DocumentRequest;
 use App\Models\Precedent;
+use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\DocumentGenerationFailedNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\IOFactory;
 use Tests\Support\WillPrecedentFixture;
@@ -63,6 +66,47 @@ class GenerateDocumentJobTest extends TestCase
         $this->assertSame('failed', $documentRequest->status);
         $this->assertStringContainsString('No document generator registered', $documentRequest->error_message);
         $this->assertNull($documentRequest->generated_docx_path);
+    }
+
+    public function test_failure_notifies_staff_when_email_configured(): void
+    {
+        Notification::fake();
+        Setting::set('staff_notification_email', 'staff@example.com', 'email');
+
+        $user = User::factory()->create();
+        $precedent = $this->makeWillPrecedent(['generator_class' => 'nonexistent_key']);
+
+        $documentRequest = DocumentRequest::create([
+            'precedent_id'             => $precedent->id,
+            'precedent_title_snapshot' => 'Last Will and Testament',
+            'requested_by'             => $user->id,
+            'answers'                  => $this->willAnswers(),
+            'status'                   => 'pending',
+        ]);
+
+        GenerateDocumentJob::dispatchSync($documentRequest);
+
+        Notification::assertSentOnDemand(DocumentGenerationFailedNotification::class);
+    }
+
+    public function test_failure_skips_notification_when_no_email_configured(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $precedent = $this->makeWillPrecedent(['generator_class' => 'nonexistent_key']);
+
+        $documentRequest = DocumentRequest::create([
+            'precedent_id'             => $precedent->id,
+            'precedent_title_snapshot' => 'Last Will and Testament',
+            'requested_by'             => $user->id,
+            'answers'                  => $this->willAnswers(),
+            'status'                   => 'pending',
+        ]);
+
+        GenerateDocumentJob::dispatchSync($documentRequest);
+
+        Notification::assertNothingSent();
     }
 
     public function test_missing_precedent_marks_the_request_failed(): void
