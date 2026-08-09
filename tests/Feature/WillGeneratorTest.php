@@ -1,0 +1,178 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Exceptions\ClauseNotFoundException;
+use App\Models\Precedent;
+use App\Services\DocxBuilder;
+use App\Services\Generators\WillGenerator;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpWord\Element\Text;
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Style\ListItem as LIS;
+use Tests\TestCase;
+
+class WillGeneratorTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function makeWillPrecedent(): Precedent
+    {
+        Storage::fake('local');
+
+        $phpWord = new PhpWord();
+        $section = $phpWord->addSection();
+        $section->addText('[[CLAUSE:revocation]]');
+        $section->addText('I revoke all prior wills and testamentary acts made by me.', ['bold' => true]);
+        $section->addText('[[/CLAUSE]]');
+        $section->addText('[[CLAUSE:executor_powers]]');
+        $section->addListItem('exercise any powers given to them by law', 0, null, LIS::TYPE_NUMBER);
+        $section->addListItem('sell by public auction or private sale', 0, null, LIS::TYPE_NUMBER);
+        $section->addText('[[/CLAUSE]]');
+
+        $tmp = tempnam(sys_get_temp_dir(), 'will_precedent_') . '.docx';
+        IOFactory::createWriter($phpWord, 'Word2007')->save($tmp);
+        Storage::disk('local')->put('precedents/will.docx', file_get_contents($tmp));
+        @unlink($tmp);
+
+        return Precedent::create([
+            'title'                => 'Last Will and Testament',
+            'docx_path'            => 'precedents/will.docx',
+            'generator_class'      => 'will',
+            'questionnaire_fields' => [], // not exercised directly by this test — generate() is called with raw answers
+            'is_active'            => true,
+        ]);
+    }
+
+    private function baseAnswers(): array
+    {
+        return [
+            'testator_name'   => 'Ashley Dewell',
+            'testator_street' => '1 First Street',
+            'testator_suburb' => 'Sydney',
+            'testator_state'  => 'State of New South Wales',
+            'testator_gender' => 'male',
+            'executor_name'   => 'Alfred Smith',
+            'executor_gender' => 'male',
+            'beneficiaries'   => "Alfred Smith - 50 - male\nBernadette Smith - 50 - female",
+        ];
+    }
+
+    public function test_generates_expected_structure_with_no_alternate_executor(): void
+    {
+        $precedent = $this->makeWillPrecedent();
+        $result = app(WillGenerator::class)->generate($precedent, $this->baseAnswers());
+
+        $this->assertSame('Last Will and Testament of Ashley Dewell', $result['title']);
+
+        $text = collect($result['blocks'])->pluck('text')->filter()->implode(' | ');
+        $this->assertStringContainsString('Ashley Dewell of 1 First Street, Sydney in the State of New South Wales', $text);
+        $this->assertStringContainsString('I appoint Alfred Smith as my executor. If he is unable to act or continue to act as my executor then I appoint the Public Trustee as my executor.', $text);
+    }
+
+    public function test_alternate_executor_chains_to_public_trustee_with_correct_pronouns(): void
+    {
+        $precedent = $this->makeWillPrecedent();
+        $answers = $this->baseAnswers() + [
+            'alternate_executor_name'   => 'Bernadette Smith',
+            'alternate_executor_gender' => 'female',
+        ];
+
+        $result = app(WillGenerator::class)->generate($precedent, $answers);
+        $text = collect($result['blocks'])->pluck('text')->filter()->implode(' | ');
+
+        $this->assertStringContainsString(
+            'I appoint Alfred Smith as my executor. If he is unable to act or continue to act as my executor '
+            . 'then I appoint Bernadette Smith as my executor, provided that if she does not survive me then '
+            . 'I appoint the Public Trustee as my executor.',
+            $text
+        );
+    }
+
+    public function test_beneficiary_survivorship_uses_correct_pronoun_per_beneficiary(): void
+    {
+        $precedent = $this->makeWillPrecedent();
+        $result = app(WillGenerator::class)->generate($precedent, $this->baseAnswers());
+
+        $text = collect($result['blocks'])->pluck('text')->filter()->implode(' | ');
+
+        $this->assertStringContainsString(
+            'I give my 50% of my estate to Alfred Smith provided however that if he does not survive me, '
+            . 'leaving children that do survive me, then those children shall take equally the share that '
+            . 'would have been received by him.',
+            $text
+        );
+        $this->assertStringContainsString(
+            'I give my 50% of my estate to Bernadette Smith provided however that if she does not survive me, '
+            . 'leaving children that do survive me, then those children shall take equally the share that '
+            . 'would have been received by her.',
+            $text
+        );
+    }
+
+    public function test_verbatim_clause_text_appears_unparaphrased(): void
+    {
+        $precedent = $this->makeWillPrecedent();
+        $result = app(WillGenerator::class)->generate($precedent, $this->baseAnswers());
+
+        $rawBlocks = collect($result['blocks'])->where('type', 'raw');
+        $allText = $rawBlocks->flatMap(fn ($b) => collect($b['elements'])->flatMap(fn ($el) => array_column($el->runs, 'text')))->implode(' ');
+
+        $this->assertStringContainsString('I revoke all prior wills and testamentary acts made by me.', $allText);
+        $this->assertStringContainsString('exercise any powers given to them by law', $allText);
+    }
+
+    public function test_missing_clause_tag_throws_instead_of_producing_an_incomplete_document(): void
+    {
+        Storage::fake('local');
+        $phpWord = new PhpWord();
+        $phpWord->addSection()->addText('placeholder — no clause markers at all');
+        $tmp = tempnam(sys_get_temp_dir(), 'bad_precedent_') . '.docx';
+        IOFactory::createWriter($phpWord, 'Word2007')->save($tmp);
+        Storage::disk('local')->put('precedents/bad.docx', file_get_contents($tmp));
+        @unlink($tmp);
+
+        $precedent = Precedent::create([
+            'title' => 'Broken Precedent', 'docx_path' => 'precedents/bad.docx',
+            'generator_class' => 'will', 'questionnaire_fields' => [], 'is_active' => true,
+        ]);
+
+        $this->expectException(ClauseNotFoundException::class);
+        app(WillGenerator::class)->generate($precedent, $this->baseAnswers());
+    }
+
+    public function test_full_pipeline_through_docxbuilder_preserves_style_fidelity(): void
+    {
+        $precedent = $this->makeWillPrecedent();
+        $result = app(WillGenerator::class)->generate($precedent, $this->baseAnswers());
+
+        $outputPath = tempnam(sys_get_temp_dir(), 'generated_will_') . '.docx';
+
+        try {
+            app(DocxBuilder::class)->buildAndSave($result['title'], $result['blocks'], $outputPath);
+
+            $reloaded = IOFactory::load($outputPath, 'Word2007');
+            $boldTextFound = false;
+
+            foreach ($reloaded->getSections() as $section) {
+                foreach ($section->getElements() as $element) {
+                    if (! method_exists($element, 'getElements')) {
+                        continue;
+                    }
+                    foreach ($element->getElements() as $child) {
+                        if ($child instanceof Text && str_contains((string) $child->getText(), 'I revoke all prior wills')) {
+                            $font = $child->getFontStyle();
+                            $boldTextFound = is_object($font) && $font->isBold();
+                        }
+                    }
+                }
+            }
+
+            $this->assertTrue($boldTextFound, 'The revocation clause\'s bold formatting must survive the full precedent -> generator -> DocxBuilder pipeline.');
+        } finally {
+            @unlink($outputPath);
+        }
+    }
+}

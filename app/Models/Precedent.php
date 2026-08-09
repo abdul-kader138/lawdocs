@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Exceptions\ClauseMarkerException;
+use App\Services\Clause\ClauseMarkerParser;
 use App\Services\PrecedentTextExtractor;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +17,8 @@ class Precedent extends Model
 
     protected $fillable = [
         'title', 'category', 'description', 'docx_path', 'docx_original_filename',
-        'extracted_text', 'questionnaire_fields', 'is_active', 'created_by',
+        'extracted_text', 'clause_marker_error', 'questionnaire_fields',
+        'generator_class', 'is_active', 'created_by',
     ];
 
     protected $casts = [
@@ -30,8 +33,19 @@ class Precedent extends Model
         // with whatever file is actually stored.
         static::saving(function (Precedent $precedent) {
             if ($precedent->isDirty('docx_path') && $precedent->docx_path) {
-                $precedent->extracted_text = app(PrecedentTextExtractor::class)
-                    ->extract(Storage::disk('local')->path($precedent->docx_path));
+                $absolutePath = Storage::disk('local')->path($precedent->docx_path);
+
+                $precedent->extracted_text = app(PrecedentTextExtractor::class)->extract($absolutePath);
+
+                // Surfaces a malformed clause marker (unclosed/duplicate/etc)
+                // at upload time, next to the extracted_text preview, rather
+                // than only when a staff member tries to generate from it.
+                try {
+                    app(ClauseMarkerParser::class)->parse($absolutePath);
+                    $precedent->clause_marker_error = null;
+                } catch (ClauseMarkerException $e) {
+                    $precedent->clause_marker_error = $e->getMessage();
+                }
             }
         });
     }
@@ -53,9 +67,10 @@ class Precedent extends Model
             ->keyBy('name')
             ->map(fn ($f) => [
                 'label'       => $f['label'] ?? $f['name'],
-                'type'        => $f['type'] ?? 'text', // text|textarea|number|date|boolean
+                'type'        => $f['type'] ?? 'text', // text|textarea|number|date|boolean|select
                 'required'    => (bool) ($f['required'] ?? false),
                 'description' => $f['description'] ?? '',
+                'options'     => $f['options'] ?? [],
             ])
             ->toArray();
     }
