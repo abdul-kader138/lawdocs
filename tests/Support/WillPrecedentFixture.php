@@ -6,12 +6,15 @@ use App\Models\Precedent;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
-use PhpOffice\PhpWord\Style\ListItem as ListItemStyle;
+use PhpOffice\PhpWord\SimpleType\NumberFormat;
+use PhpOffice\PhpWord\Style;
 
 /**
  * Shared real, marker-bearing will precedent builder — used anywhere a test
  * needs an actual Precedent that WillGenerator can successfully generate
  * from (i.e. it must have the 'revocation' and 'executor_powers' clause tags).
+ * executor_powers is a genuine nested list (a./b. with i./ii./iii. under b.),
+ * matching the original worked example's clause 5 exactly.
  */
 trait WillPrecedentFixture
 {
@@ -20,13 +23,23 @@ trait WillPrecedentFixture
         Storage::fake('local');
 
         $phpWord = new PhpWord();
+        Style::addNumberingStyle('test_executor_powers_levels', [
+            'type' => 'multilevel',
+            'levels' => [
+                ['format' => NumberFormat::LOWER_LETTER, 'text' => '%1.', 'left' => 720, 'hanging' => 360, 'tabPos' => 720],
+                ['format' => NumberFormat::LOWER_ROMAN, 'text' => '%2.', 'left' => 1440, 'hanging' => 360, 'tabPos' => 1440],
+            ],
+        ]);
+
         $section = $phpWord->addSection();
         $section->addText('[[CLAUSE:revocation]]');
         $section->addText('I revoke all prior wills and testamentary acts made by me.', ['bold' => true]);
         $section->addText('[[/CLAUSE]]');
         $section->addText('[[CLAUSE:executor_powers]]');
-        $section->addListItem('exercise any powers given to them by law', 0, null, ListItemStyle::TYPE_NUMBER);
-        $section->addListItem('sell by public auction or private sale', 0, null, ListItemStyle::TYPE_NUMBER);
+        $section->addListItemRun(0, 'test_executor_powers_levels')->addText('exercise any powers given to them by law;');
+        $section->addListItemRun(0, 'test_executor_powers_levels')->addText('exercise the powers of an executor for sale in respect of any assets in my estate:');
+        $section->addListItemRun(1, 'test_executor_powers_levels')->addText('without being liable for any loss caused by so doing, postpone sale;');
+        $section->addListItemRun(1, 'test_executor_powers_levels')->addText('sell by public auction or private sale, for cash or on credit.');
         $section->addText('[[/CLAUSE]]');
 
         $tmp = tempnam(sys_get_temp_dir(), 'will_precedent_') . '.docx';
