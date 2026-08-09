@@ -21,8 +21,14 @@ use App\Services\GrammarResolver;
  * own numbering (if any) and freshly-generated list numbering are separate
  * PHPWord numbering definitions that can't be cleanly unified into one
  * continuous counter without deliberately linking numbering IDs — out of
- * scope for this example. Nested multi-level clause numbering (a./i./ii.)
- * is a documented v1.1 gap per the implementation plan.
+ * scope for this example.
+ *
+ * Nested multi-level numbering WITHIN a clause (a./b. sub-items, i./ii./iii.
+ * sub-sub-items — e.g. an executor_powers clause authored in Word with a
+ * genuine multi-level list) is fully supported: depth and per-level
+ * formatting are preserved automatically by ClauseMarkerParser/DocxBuilder's
+ * existing capture/re-emit path, with no special-casing needed here. See
+ * ClauseToDocxRoundTripTest::test_nested_multilevel_clause_preserves_depth_and_per_level_format().
  */
 class WillGenerator implements DocumentGenerator
 {
