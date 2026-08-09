@@ -43,6 +43,14 @@
 
 {{-- ── Layout CSS ──────────────────────────────────────────────────────────── --}}
 <style>
+    /* Filament's default page background (bg-gray-950 in dark mode) would
+       otherwise show through as a flat, harsh black next to the gradient
+       panel — this keeps the right-hand side visually part of the same
+       dark palette instead of a jarring two-tone seam. */
+    body.fi-body {
+        background: rgb({{ $start }}) !important;
+    }
+
     @media (min-width: 1024px) {
         .auth-brand-panel {
             position: fixed !important;
@@ -53,6 +61,17 @@
             z-index: 20;
         }
         .fi-simple-main {
+            /* Must stay full-bleed (not a narrower "card" width) — it's the
+               outer element .fi-simple-main-ctn centers across the WHOLE
+               viewport, and .auth-brand-panel renders as ITS descendant via
+               the SIMPLE_PAGE_START render hook. Constraining this element's
+               width fights that centering (the card ends up mid-screen, not
+               in the right half) and — worse — giving it any
+               transform/filter/backdrop-filter creates a CSS containing
+               block that breaks .auth-brand-panel's position:fixed entirely.
+               Confirmed both the hard way; the actual "card" look for the
+               login form is applied below, to .fi-simple-page's real content
+               child instead, which IS free to be a narrow, centered box. */
             max-width: 100vw !important;
             width: 100% !important;
             margin: 0 !important;
@@ -60,7 +79,6 @@
             box-shadow: none !important;
             padding: 0 !important;
             background: transparent !important;
-            ring: none !important;
             min-height: 100vh;
         }
         .fi-simple-main.ring-1 { --tw-ring-shadow: none !important; }
@@ -76,9 +94,20 @@
             padding-right: 2rem;
             box-sizing: border-box;
         }
-        .fi-simple-page > *:not(.auth-brand-panel) {
+        /* .fi-simple-page also contains a few empty <form> elements Filament
+           uses internally for its modal-action system (hidden until a modal
+           is triggered) — targeting `section` specifically, not a broad
+           :not(.auth-brand-panel) selector, avoids styling those as empty
+           bordered boxes. */
+        .fi-simple-page > section {
             max-width: 22rem;
             width: 100%;
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 1rem;
+            box-shadow: 0 20px 60px -15px rgba(0,0,0,.5);
+            padding: 2.25rem 2rem;
+            box-sizing: border-box;
         }
     }
     @media (max-width: 1023px) {
