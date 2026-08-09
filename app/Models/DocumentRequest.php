@@ -13,12 +13,12 @@ class DocumentRequest extends Model
     protected $fillable = [
         'precedent_id', 'precedent_title_snapshot', 'requested_by', 'case_reference',
         'answers', 'status', 'error_message', 'generated_docx_path', 'generated_title',
-        'claude_raw_response', 'generated_at',
+        'generation_snapshot', 'generated_at',
     ];
 
     protected $casts = [
         'answers'              => 'array',
-        'claude_raw_response'  => 'array',
+        'generation_snapshot'  => 'array',
         'generated_at'         => 'datetime',
     ];
 

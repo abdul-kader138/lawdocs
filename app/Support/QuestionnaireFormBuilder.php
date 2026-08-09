@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Precedent;
 use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -30,6 +31,7 @@ class QuestionnaireFormBuilder
                     'number'   => TextInput::make($statePath)->numeric(),
                     'date'     => DatePicker::make($statePath),
                     'boolean'  => Toggle::make($statePath),
+                    'select'   => Select::make($statePath)->options($field['options'] ?? [])->native(false),
                     default    => TextInput::make($statePath),
                 };
 

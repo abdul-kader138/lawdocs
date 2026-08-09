@@ -5,7 +5,6 @@ namespace App\Filament\Pages;
 use App\Models\Setting;
 use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Forms\Components\Section;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Tabs;
 use Filament\Forms\Components\Tabs\Tab;
 use Filament\Forms\Components\TextInput;
@@ -60,12 +59,6 @@ class SystemSettings extends Page implements HasForms
     public function mount(): void
     {
         $this->form->fill([
-            // Claude AI
-            'claude_api_key'     => Setting::get('claude_api_key', ''),
-            'claude_model'       => Setting::get('claude_model', config('services.anthropic.model')),
-            'claude_max_tokens'  => Setting::get('claude_max_tokens', 8192),
-            'claude_temperature' => Setting::get('claude_temperature', 0.2),
-
             // Document Defaults
             'docx_font_family' => Setting::get('docx_font_family', 'Times New Roman'),
             'docx_font_size'   => Setting::get('docx_font_size', 12),
@@ -78,46 +71,6 @@ class SystemSettings extends Page implements HasForms
             ->statePath('data')
             ->schema([
                 Tabs::make('settings_tabs')->tabs([
-
-                    // ── Claude AI ────────────────────────────────────────────
-                    Tab::make('Claude AI')
-                        ->icon('heroicon-o-sparkles')
-                        ->schema([
-                            Section::make('Anthropic API')
-                                ->description('Configure the Claude model used to draft documents.')
-                                ->schema([
-                                    TextInput::make('claude_api_key')
-                                        ->label('API Key')
-                                        ->password()
-                                        ->revealable()
-                                        ->maxLength(255)
-                                        ->autocomplete('new-password')
-                                        ->helperText('Your Anthropic API key from console.anthropic.com. Leave blank to use the ANTHROPIC_API_KEY env value.'),
-
-                                    TextInput::make('claude_model')
-                                        ->label('Model')
-                                        ->required()
-                                        ->maxLength(100)
-                                        ->helperText('e.g. claude-sonnet-4-6. A stronger model is recommended over Haiku given drafting-quality stakes.'),
-
-                                    TextInput::make('claude_max_tokens')
-                                        ->label('Max Tokens')
-                                        ->numeric()
-                                        ->minValue(1024)
-                                        ->maxValue(64000)
-                                        ->required()
-                                        ->helperText('Output limit for a drafted document. If a draft is cut off (truncated), raise this.'),
-
-                                    TextInput::make('claude_temperature')
-                                        ->label('Temperature')
-                                        ->numeric()
-                                        ->minValue(0)
-                                        ->maxValue(1)
-                                        ->step(0.1)
-                                        ->required()
-                                        ->helperText('Low (0-0.3) is recommended for legal drafting — consistency over creativity.'),
-                                ]),
-                        ]),
 
                     // ── Document Defaults ───────────────────────────────────
                     Tab::make('Document Defaults')
@@ -149,12 +102,8 @@ class SystemSettings extends Page implements HasForms
         $data = $this->form->getState();
 
         $groups = [
-            'claude_api_key'     => 'claude',
-            'claude_model'       => 'claude',
-            'claude_max_tokens'  => 'claude',
-            'claude_temperature' => 'claude',
-            'docx_font_family'   => 'document',
-            'docx_font_size'     => 'document',
+            'docx_font_family' => 'document',
+            'docx_font_size'   => 'document',
         ];
 
         foreach ($data as $key => $value) {

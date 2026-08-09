@@ -22,7 +22,7 @@ class SystemSettingsPageTest extends TestCase
             ->get('/admin/system-settings')
             ->assertOk();
 
-        Setting::set('claude_model', 'claude-sonnet-4-6', 'claude');
-        $this->assertSame('claude-sonnet-4-6', Setting::get('claude_model'));
+        Setting::set('docx_font_family', 'Georgia', 'document');
+        $this->assertSame('Georgia', Setting::get('docx_font_family'));
     }
 }

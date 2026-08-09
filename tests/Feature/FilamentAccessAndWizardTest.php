@@ -4,20 +4,16 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\DocumentRequestResource\Pages\CreateDocumentRequest;
 use App\Models\DocumentRequest;
-use App\Models\Precedent;
-use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\PhpWord;
+use Tests\Support\WillPrecedentFixture;
 use Tests\TestCase;
 
 class FilamentAccessAndWizardTest extends TestCase
 {
     use RefreshDatabase;
+    use WillPrecedentFixture;
 
     protected function setUp(): void
     {
@@ -25,24 +21,18 @@ class FilamentAccessAndWizardTest extends TestCase
         $this->seed(\Database\Seeders\ShieldSeeder::class);
     }
 
-    private function makePrecedent(): Precedent
+    private function willQuestionnaireFields(): array
     {
-        Storage::fake('local');
-        $phpWord = new PhpWord();
-        $phpWord->addSection()->addText('placeholder');
-        $tmp = tempnam(sys_get_temp_dir(), 'precedent_') . '.docx';
-        IOFactory::createWriter($phpWord, 'Word2007')->save($tmp);
-        Storage::disk('local')->put('precedents/will.docx', file_get_contents($tmp));
-        @unlink($tmp);
-
-        return Precedent::create([
-            'title'                => 'Last Will and Testament',
-            'docx_path'            => 'precedents/will.docx',
-            'questionnaire_fields' => [
-                ['name' => 'testator_name', 'label' => "Testator's Name", 'type' => 'text', 'required' => true, 'description' => 'Full legal name'],
-            ],
-            'is_active' => true,
-        ]);
+        return [
+            ['name' => 'testator_name', 'label' => "Testator's Name", 'type' => 'text', 'required' => true, 'description' => 'Full legal name'],
+            ['name' => 'testator_street', 'label' => 'Street', 'type' => 'text', 'required' => true, 'description' => ''],
+            ['name' => 'testator_suburb', 'label' => 'Suburb', 'type' => 'text', 'required' => true, 'description' => ''],
+            ['name' => 'testator_state', 'label' => 'State', 'type' => 'text', 'required' => true, 'description' => ''],
+            ['name' => 'testator_gender', 'label' => 'Gender', 'type' => 'select', 'required' => true, 'description' => '', 'options' => ['male' => 'Male', 'female' => 'Female']],
+            ['name' => 'executor_name', 'label' => 'Executor Name', 'type' => 'text', 'required' => true, 'description' => ''],
+            ['name' => 'executor_gender', 'label' => 'Executor Gender', 'type' => 'select', 'required' => true, 'description' => '', 'options' => ['male' => 'Male', 'female' => 'Female']],
+            ['name' => 'beneficiaries', 'label' => 'Beneficiaries', 'type' => 'textarea', 'required' => true, 'description' => ''],
+        ];
     }
 
     public function test_super_admin_can_access_precedent_resource(): void
@@ -74,37 +64,14 @@ class FilamentAccessAndWizardTest extends TestCase
 
     public function test_panel_user_full_wizard_flow_generates_and_downloads_a_document(): void
     {
-        Setting::set('claude_api_key', 'sk-test', 'claude');
-
-        Http::fake([
-            'https://api.anthropic.com/*' => Http::response([
-                'stop_reason' => 'tool_use',
-                'content'     => [[
-                    'type'  => 'tool_use',
-                    'name'  => 'draft_document',
-                    'input' => [
-                        'title'  => 'Last Will and Testament of John Doe',
-                        'blocks' => [
-                            ['type' => 'heading', 'level' => 2, 'text' => '1. Executor'],
-                            ['type' => 'paragraph', 'text' => 'I appoint Jane Doe as Executor.'],
-                        ],
-                    ],
-                ]],
-            ]),
-        ]);
-
-        $staff     = User::factory()->create();
+        $staff = User::factory()->create();
         $staff->assignRole('panel_user');
-        $precedent = $this->makePrecedent();
+        $precedent = $this->makeWillPrecedent(['questionnaire_fields' => $this->willQuestionnaireFields()]);
 
         $this->actingAs($staff);
 
         Livewire::test(CreateDocumentRequest::class)
-            ->fillForm([
-                'precedent_id'          => $precedent->id,
-                'answers.testator_name' => 'John Doe',
-                'case_reference'        => 'MATTER-001',
-            ])
+            ->fillForm(['precedent_id' => $precedent->id, 'answers' => $this->willAnswers(), 'case_reference' => 'MATTER-001'])
             ->call('create')
             ->assertHasNoFormErrors();
 
@@ -112,7 +79,7 @@ class FilamentAccessAndWizardTest extends TestCase
 
         $this->assertSame('completed', $documentRequest->status);
         $this->assertSame('MATTER-001', $documentRequest->case_reference);
-        $this->assertSame('John Doe', $documentRequest->answers['testator_name']);
+        $this->assertSame('Ashley Dewell', $documentRequest->answers['testator_name']);
 
         // The requesting staff member can download the result.
         $this->actingAs($staff)
@@ -124,7 +91,7 @@ class FilamentAccessAndWizardTest extends TestCase
     {
         $staff = User::factory()->create();
         $staff->assignRole('panel_user');
-        $precedent = $this->makePrecedent();
+        $precedent = $this->makeWillPrecedent();
 
         $pending = DocumentRequest::create([
             'precedent_id'             => $precedent->id,

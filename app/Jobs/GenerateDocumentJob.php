@@ -3,8 +3,8 @@
 namespace App\Jobs;
 
 use App\Models\DocumentRequest;
-use App\Services\DocumentDrafter;
 use App\Services\DocxBuilder;
+use App\Services\Generators\GeneratorRegistry;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -26,7 +26,7 @@ class GenerateDocumentJob implements ShouldQueue
 
     public function __construct(public DocumentRequest $documentRequest) {}
 
-    public function handle(DocumentDrafter $drafter, DocxBuilder $docxBuilder): void
+    public function handle(DocxBuilder $docxBuilder, GeneratorRegistry $registry): void
     {
         $this->documentRequest->update(['status' => 'processing']);
 
@@ -37,7 +37,8 @@ class GenerateDocumentJob implements ShouldQueue
                 throw new \RuntimeException('The precedent for this request no longer exists.');
             }
 
-            $draft = $drafter->draft($precedent, $this->documentRequest->answers ?? []);
+            $generator = $registry->resolve($precedent->generator_class);
+            $draft     = $generator->generate($precedent, $this->documentRequest->answers ?? []);
 
             $relativePath = 'generated/' . Str::uuid() . '.docx';
             Storage::disk('local')->makeDirectory('generated');
@@ -47,7 +48,7 @@ class GenerateDocumentJob implements ShouldQueue
                 'status'               => 'completed',
                 'generated_title'      => $draft['title'],
                 'generated_docx_path'  => $relativePath,
-                'claude_raw_response'  => $draft,
+                'generation_snapshot'  => $draft,
                 'generated_at'         => now(),
                 'error_message'        => null,
             ]);
