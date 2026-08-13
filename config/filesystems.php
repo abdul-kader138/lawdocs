@@ -60,6 +60,16 @@ return [
             'report' => false,
         ],
 
+        // Private storage for the Documents file manager. Kept outside 'public' so
+        // files are only reachable through the authenticated download endpoint.
+        'documents' => [
+            'driver' => 'local',
+            'root' => storage_path('app/private/documents'),
+            'serve' => false,
+            'throw' => false,
+            'report' => false,
+        ],
+
     ],
 
     /*

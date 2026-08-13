@@ -34,8 +34,8 @@ class ShieldSeeder extends Seeder
         // operator: staff who can also manage precedents.
         // panel_user: staff who can only request/view documents, never precedents.
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
-        $operator   = Role::firstOrCreate(['name' => 'operator',    'guard_name' => 'web']);
-        $panelUser  = Role::firstOrCreate(['name' => 'panel_user',  'guard_name' => 'web']);
+        $operator = Role::firstOrCreate(['name' => 'operator',    'guard_name' => 'web']);
+        $panelUser = Role::firstOrCreate(['name' => 'panel_user',  'guard_name' => 'web']);
 
         // filament-shield's config ships with super_admin.define_via_gate = false,
         // meaning there is NO automatic Gate::before bypass for this role — it
@@ -48,20 +48,33 @@ class ShieldSeeder extends Seeder
         // Note the `::` in these permission names — that's Shield's generated
         // slug for the multi-word "DocumentRequest" model (view_document::request,
         // not view_document_request), not a typo.
-        $documentRequestPermissions = [
+        $panelUserPermissions = [
             'view_any_document::request',
             'view_document::request',
             'create_document::request',
+            // Clients/contacts are shared reference data, not a workflow
+            // record with an approval gate — any staff member who can raise
+            // a document request should also be able to maintain the
+            // reusable client/contact details that prefill one. Deliberately
+            // no delete_client here though: removing a client record (and
+            // its contacts, cascade) is a more consequential action than
+            // creating/editing one.
+            'view_any_client',
+            'view_client',
+            'create_client',
+            'update_client',
         ];
 
         $panelUser->syncPermissions(
-            Permission::whereIn('name', $documentRequestPermissions)->get()
+            Permission::whereIn('name', $panelUserPermissions)->get()
         );
 
-        // operator gets everything panel_user gets, plus full precedent management.
+        // operator gets everything panel_user gets, plus full precedent
+        // management and full client management (including delete).
         $operator->syncPermissions(
             Permission::where('name', 'like', '%_document::request')
                 ->orWhere('name', 'like', '%_precedent')
+                ->orWhere('name', 'like', '%_client')
                 ->get()
         );
 
@@ -69,8 +82,8 @@ class ShieldSeeder extends Seeder
         $admin = User::firstOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@admin.com')],
             [
-                'name'              => env('ADMIN_NAME', 'Super Admin'),
-                'password'          => Hash::make(env('ADMIN_PASSWORD', 'password')),
+                'name' => env('ADMIN_NAME', 'Super Admin'),
+                'password' => Hash::make(env('ADMIN_PASSWORD', 'password')),
                 'email_verified_at' => now(),
             ]
         );

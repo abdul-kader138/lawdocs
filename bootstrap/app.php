@@ -12,7 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // The SVAR File Manager's RestDataProvider issues plain fetch() calls with no
+        // way to attach a CSRF header (see app/Http/Controllers/Panel/DocumentController.php).
+        // Auth + per-request ownership checks carry security instead of the token.
+        $middleware->validateCsrfTokens(except: [
+            'panel-api/documents/*',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

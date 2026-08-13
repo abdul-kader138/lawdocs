@@ -7,10 +7,18 @@
         "dev": "vite"
     },
     "devDependencies": {
+        "@rolldown/binding-linux-x64-gnu": "^1.2.3",
         "@tailwindcss/vite": "^4.0.0",
+        "@vitejs/plugin-react": "^6.0.5",
         "concurrently": "^9.0.1",
         "laravel-vite-plugin": "^3.1",
         "tailwindcss": "^4.0.0",
         "vite": "^8.0.0"
+    },
+    "dependencies": {
+        "@svar-ui/filemanager-data-provider": "^2.6.0",
+        "@svar-ui/react-filemanager": "^2.6.0",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8"
     }
 }

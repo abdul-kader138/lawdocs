@@ -3,6 +3,8 @@
 namespace Tests\Unit;
 
 use App\Exceptions\ClauseMarkerException;
+use App\Services\Clause\ClauseBlockNode;
+use App\Services\Clause\ClauseElement;
 use App\Services\Clause\ClauseMarkerParser;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
@@ -13,9 +15,9 @@ class ClauseMarkerParserTest extends TestCase
 {
     private function buildDocx(callable $build): string
     {
-        $phpWord = new PhpWord();
+        $phpWord = new PhpWord;
         $build($phpWord->addSection());
-        $path = tempnam(sys_get_temp_dir(), 'clause_parser_test_') . '.docx';
+        $path = tempnam(sys_get_temp_dir(), 'clause_parser_test_').'.docx';
         IOFactory::createWriter($phpWord, 'Word2007')->save($path);
 
         return $path;
@@ -170,7 +172,7 @@ class ClauseMarkerParserTest extends TestCase
         }
     }
 
-    public function test_table_inside_a_clause_throws_a_documented_gap_exception(): void
+    public function test_table_inside_a_clause_is_captured_as_a_table_element(): void
     {
         $path = $this->buildDocx(function ($section) {
             $section->addText('[[CLAUSE:has_table]]');
@@ -181,9 +183,365 @@ class ClauseMarkerParserTest extends TestCase
         });
 
         try {
+            $clauses = app(ClauseMarkerParser::class)->parse($path);
+
+            $this->assertCount(1, $clauses['has_table']);
+            $this->assertSame('table', $clauses['has_table'][0]->kind);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    // ── IF / REPEAT grammar ─────────────────────────────────────────────
+
+    public function test_if_else_endif_produces_a_block_node_with_both_branches(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[IF:has_alternate]]');
+            $section->addText('Then text.');
+            $section->addText('[[ELSE]]');
+            $section->addText('Else text.');
+            $section->addText('[[/IF]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $clauses = app(ClauseMarkerParser::class)->parse($path);
+            $this->assertCount(1, $clauses['test_clause']);
+
+            $node = $clauses['test_clause'][0];
+            $this->assertInstanceOf(ClauseBlockNode::class, $node);
+            $this->assertSame('if', $node->kind);
+            $this->assertSame('has_alternate', $node->condition);
+            $this->assertCount(1, $node->then);
+            $this->assertSame('Then text.', $node->then[0]->runs[0]['text']);
+            $this->assertCount(1, $node->else);
+            $this->assertSame('Else text.', $node->else[0]->runs[0]['text']);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_if_without_else_has_null_else_branch(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[IF:flag]]');
+            $section->addText('Then text.');
+            $section->addText('[[/IF]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $clauses = app(ClauseMarkerParser::class)->parse($path);
+            $node = $clauses['test_clause'][0];
+
+            $this->assertNull($node->else);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_repeat_produces_a_block_node_with_group_key_and_default_alias(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[REPEAT:beneficiaries]]');
+            $section->addText('A row.');
+            $section->addText('[[/REPEAT]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $clauses = app(ClauseMarkerParser::class)->parse($path);
+            $node = $clauses['test_clause'][0];
+
+            $this->assertInstanceOf(ClauseBlockNode::class, $node);
+            $this->assertSame('repeat', $node->kind);
+            $this->assertSame('beneficiaries', $node->groupKey);
+            $this->assertSame('beneficiaries', $node->alias);
+            $this->assertCount(1, $node->children);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_repeat_as_alias_is_captured(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[REPEAT:beneficiaries AS beneficiary]]');
+            $section->addText('A row.');
+            $section->addText('[[/REPEAT]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $clauses = app(ClauseMarkerParser::class)->parse($path);
+            $node = $clauses['test_clause'][0];
+
+            $this->assertSame('beneficiaries', $node->groupKey);
+            $this->assertSame('beneficiary', $node->alias);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_repeat_nested_inside_if_and_if_nested_inside_repeat(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[IF:outer_flag]]');
+            $section->addText('[[REPEAT:beneficiaries AS beneficiary]]');
+            $section->addText('[[IF:beneficiary.per_stirpes]]');
+            $section->addText('Per stirpes text.');
+            $section->addText('[[/IF]]');
+            $section->addText('[[/REPEAT]]');
+            $section->addText('[[/IF]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $clauses = app(ClauseMarkerParser::class)->parse($path);
+            $outerIf = $clauses['test_clause'][0];
+
+            $this->assertSame('if', $outerIf->kind);
+            $repeat = $outerIf->then[0];
+            $this->assertSame('repeat', $repeat->kind);
+            $innerIf = $repeat->children[0];
+            $this->assertSame('if', $innerIf->kind);
+            $this->assertSame('beneficiary.per_stirpes', $innerIf->condition);
+            $this->assertSame('Per stirpes text.', $innerIf->then[0]->runs[0]['text']);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_leaf_elements_and_control_nodes_can_be_siblings(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('Before.');
+            $section->addText('[[IF:flag]]');
+            $section->addText('Conditional.');
+            $section->addText('[[/IF]]');
+            $section->addText('After.');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $clauses = app(ClauseMarkerParser::class)->parse($path);
+            $nodes = $clauses['test_clause'];
+
+            $this->assertCount(3, $nodes);
+            $this->assertInstanceOf(ClauseElement::class, $nodes[0]);
+            $this->assertSame('Before.', $nodes[0]->runs[0]['text']);
+            $this->assertInstanceOf(ClauseBlockNode::class, $nodes[1]);
+            $this->assertInstanceOf(ClauseElement::class, $nodes[2]);
+            $this->assertSame('After.', $nodes[2]->runs[0]['text']);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_unclosed_if_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[IF:flag]]');
+            $section->addText('Never closed.');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
             $this->expectException(ClauseMarkerException::class);
-            $this->expectExceptionMessage('not supported inside clause markers yet');
+            $this->expectExceptionMessage('never closed with [[/IF]]');
             app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_unclosed_repeat_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[REPEAT:beneficiaries]]');
+            $section->addText('Never closed.');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $this->expectException(ClauseMarkerException::class);
+            $this->expectExceptionMessage('never closed with [[/REPEAT]]');
+            app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_stray_else_outside_any_if_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[ELSE]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $this->expectException(ClauseMarkerException::class);
+            $this->expectExceptionMessage('no matching [[IF:...]]');
+            app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_double_else_in_the_same_if_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[IF:flag]]');
+            $section->addText('A.');
+            $section->addText('[[ELSE]]');
+            $section->addText('B.');
+            $section->addText('[[ELSE]]');
+            $section->addText('C.');
+            $section->addText('[[/IF]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $this->expectException(ClauseMarkerException::class);
+            $this->expectExceptionMessage('more than one [[ELSE]]');
+            app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_stray_endif_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[/IF]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $this->expectException(ClauseMarkerException::class);
+            $this->expectExceptionMessage('no matching [[IF:...]]');
+            app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_stray_endrepeat_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[/REPEAT]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $this->expectException(ClauseMarkerException::class);
+            $this->expectExceptionMessage('no matching [[REPEAT:...]]');
+            app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_mismatched_close_if_ends_repeat_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[REPEAT:beneficiaries]]');
+            $section->addText('Row.');
+            $section->addText('[[/IF]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $this->expectException(ClauseMarkerException::class);
+            $this->expectExceptionMessage('no matching [[IF:...]]');
+            app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_if_or_repeat_outside_any_clause_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[IF:flag]]');
+            $section->addText('Text.');
+            $section->addText('[[/IF]]');
+        });
+
+        try {
+            $this->expectException(ClauseMarkerException::class);
+            $this->expectExceptionMessage('outside of any [[CLAUSE:...]] block');
+            app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_empty_condition_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[IF:]]');
+            $section->addText('Text.');
+            $section->addText('[[/IF]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $this->expectException(ClauseMarkerException::class);
+            $this->expectExceptionMessage('empty condition');
+            app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_malformed_repeat_header_throws(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:test_clause]]');
+            $section->addText('[[REPEAT:1invalid]]');
+            $section->addText('Text.');
+            $section->addText('[[/REPEAT]]');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $this->expectException(ClauseMarkerException::class);
+            $this->expectExceptionMessage('malformed [[REPEAT:...]] marker');
+            app(ClauseMarkerParser::class)->parse($path);
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_clause_with_no_control_markers_still_yields_a_flat_element_array(): void
+    {
+        $path = $this->buildDocx(function ($section) {
+            $section->addText('[[CLAUSE:plain]]');
+            $section->addText('Just text.');
+            $section->addText('[[/CLAUSE]]');
+        });
+
+        try {
+            $clauses = app(ClauseMarkerParser::class)->parse($path);
+
+            $this->assertCount(1, $clauses['plain']);
+            $this->assertInstanceOf(ClauseElement::class, $clauses['plain'][0]);
         } finally {
             @unlink($path);
         }

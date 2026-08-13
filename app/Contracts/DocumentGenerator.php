@@ -2,13 +2,17 @@
 
 namespace App\Contracts;
 
-use App\Models\Precedent;
+use App\Models\DocumentRequest;
 
 interface DocumentGenerator
 {
     /**
-     * @param array<string, mixed> $answers raw questionnaire answers keyed by field name
+     * Takes the whole request (not just Precedent + answers) because a
+     * generator may also need the request's structured party data
+     * (DocumentRequestParty rows, via PartyGroupAssembler) — DocumentRequest
+     * is the one object that already carries precedent, answers, and parties.
+     *
      * @return array{title: string, blocks: array<int, array<string, mixed>>}
      */
-    public function generate(Precedent $precedent, array $answers): array;
+    public function generate(DocumentRequest $documentRequest): array;
 }

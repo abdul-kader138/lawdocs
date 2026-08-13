@@ -2,20 +2,20 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\EditProfile;
+use App\Filament\Auth\Login;
+use App\Filament\Pages\Dashboard;
 use App\Models\Setting;
-use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Enums\ThemeMode;
+use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
-use Filament\Pages;
-use Filament\Pages\Auth\Login;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\View\PanelsRenderHook;
-use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -26,13 +26,34 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 
 class AdminPanelProvider extends PanelProvider
 {
+    // ── Available admin color themes ──────────────────────────────────────────
+    public static array $themes = [
+        'indigo' => ['label' => 'Indigo',     'color' => 'indigo'],
+        'amber' => ['label' => 'Amber Gold', 'color' => 'amber'],
+        'emerald' => ['label' => 'Emerald',    'color' => 'emerald'],
+        'rose' => ['label' => 'Rose',       'color' => 'rose'],
+        'violet' => ['label' => 'Violet',     'color' => 'violet'],
+        'sky' => ['label' => 'Sky Blue',   'color' => 'sky'],
+        'teal' => ['label' => 'Teal',       'color' => 'teal'],
+        'orange' => ['label' => 'Orange',     'color' => 'orange'],
+        'slate' => ['label' => 'Slate',      'color' => 'slate'],
+        'gray' => ['label' => 'Gray',       'color' => 'gray'],
+        'blue' => ['label' => 'Blue',       'color' => 'blue'],
+        'cyan' => ['label' => 'Cyan',       'color' => 'cyan'],
+        'purple' => ['label' => 'Purple',     'color' => 'purple'],
+        'pink' => ['label' => 'Pink',       'color' => 'pink'],
+    ];
+
     public function panel(Panel $panel): Panel
     {
         return $panel
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(Login::class)
+            ->profile(EditProfile::class, isSimple: false)
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('30s')
             ->brandName(fn () => Setting::get('app_name', 'LawDocs'))
             ->brandLogo(fn () => self::resolveBrandLogoUrl())
             ->favicon(fn () => self::resolveFaviconUrl())
@@ -40,16 +61,18 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => self::resolveThemeColor(),
             ])
             ->defaultThemeMode(self::resolveDefaultThemeMode())
+            ->darkMode(...array_values(self::resolveDarkModeArgs()))
+            ->renderHook(
+                PanelsRenderHook::STYLES_AFTER,
+                fn () => self::resolveAdminPanelModeStyles(),
+            )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
-                Pages\Dashboard::class,
+                Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
-            ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
-            ])
+            ->widgets([])
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -81,13 +104,20 @@ class AdminPanelProvider extends PanelProvider
     protected static function resolveThemeColor(): array
     {
         $colorMap = [
-            'indigo'  => Color::Indigo,
-            'amber'   => Color::Amber,
+            'indigo' => Color::Indigo,
+            'amber' => Color::Amber,
             'emerald' => Color::Emerald,
-            'rose'    => Color::Rose,
-            'violet'  => Color::Violet,
-            'sky'     => Color::Sky,
-            'slate'   => Color::Slate,
+            'rose' => Color::Rose,
+            'violet' => Color::Violet,
+            'sky' => Color::Sky,
+            'teal' => Color::Teal,
+            'orange' => Color::Orange,
+            'slate' => Color::Slate,
+            'gray' => Color::Gray,
+            'blue' => Color::Blue,
+            'cyan' => Color::Cyan,
+            'purple' => Color::Purple,
+            'pink' => Color::Pink,
         ];
 
         try {
@@ -99,6 +129,17 @@ class AdminPanelProvider extends PanelProvider
         return $colorMap[$theme] ?? Color::Indigo;
     }
 
+    // ── Panel dark-mode resolution ────────────────────────────────────────────
+    public static function resolveNativeThemeModeKey(?string $mode = null): string
+    {
+        return match ($mode) {
+            'light', 'sepia' => 'light',
+            'dark', 'high_contrast', 'midnight' => 'dark',
+            'system' => 'system',
+            default => 'dark',
+        };
+    }
+
     protected static function resolveDefaultThemeMode(): ThemeMode
     {
         try {
@@ -107,11 +148,85 @@ class AdminPanelProvider extends PanelProvider
             $mode = 'dark';
         }
 
-        return match ($mode) {
-            'light'  => ThemeMode::Light,
+        return match (self::resolveNativeThemeModeKey($mode)) {
+            'light' => ThemeMode::Light,
             'system' => ThemeMode::System,
-            default  => ThemeMode::Dark,
+            default => ThemeMode::Dark,
         };
+    }
+
+    protected static function resolveDarkModeArgs(): array
+    {
+        try {
+            $mode = Setting::get('admin_panel_theme_mode', 'dark');
+        } catch (\Throwable) {
+            $mode = 'dark';
+        }
+
+        return match (self::resolveNativeThemeModeKey($mode)) {
+            'light' => ['condition' => false, 'isForced' => false],
+            'system' => ['condition' => true,  'isForced' => false],
+            default => ['condition' => true,  'isForced' => true],
+        };
+    }
+
+    // ── Extra CSS injected after Filament styles (panel mode overrides) ───────
+    protected static function resolveAdminPanelModeStyles(): string
+    {
+        try {
+            $mode = Setting::get('admin_panel_theme_mode', 'dark');
+        } catch (\Throwable) {
+            $mode = 'dark';
+        }
+
+        $custom = match ($mode) {
+            'high_contrast' => <<<'CSS'
+<style>
+    .fi-body {
+        background: #020617 !important;
+        color: #f8fafc !important;
+        color-scheme: dark;
+    }
+    .fi-topbar, .fi-sidebar, .fi-header, .fi-page, .fi-main, .fi-simple-main {
+        background: #020617 !important;
+        border-color: rgba(148,163,184,.22) !important;
+    }
+    .fi-sidebar-item-label, .fi-sidebar-group-label { color: #e2e8f0 !important; }
+</style>
+CSS,
+            'sepia' => <<<'CSS'
+<style>
+    .fi-body {
+        background: linear-gradient(180deg, #f7efe4 0%, #efe3d2 100%) !important;
+        color: #4b3621 !important;
+        color-scheme: light;
+    }
+    .fi-topbar, .fi-sidebar, .fi-header, .fi-page, .fi-main, .fi-simple-main {
+        background: #f9f2e8 !important;
+        border-color: rgba(120,86,56,.16) !important;
+    }
+</style>
+CSS,
+            'midnight' => <<<'CSS'
+<style>
+    .fi-body {
+        background: linear-gradient(180deg, #020617 0%, #0f172a 55%, #111827 100%) !important;
+        color: #e5e7eb !important;
+        color-scheme: dark;
+    }
+    .fi-topbar, .fi-sidebar, .fi-header, .fi-page, .fi-main, .fi-simple-main {
+        background: rgba(15,23,42,.96) !important;
+        border-color: rgba(96,165,250,.18) !important;
+    }
+</style>
+CSS,
+            default => '',
+        };
+
+        // Always hide the built-in theme switcher — we manage it via System Settings
+        return <<<'CSS'
+<style>.fi-theme-switcher { display: none !important; }</style>
+CSS.$custom;
     }
 
     protected static function resolveBrandLogoUrl(): ?string
@@ -125,10 +240,12 @@ class AdminPanelProvider extends PanelProvider
         return $path ? Storage::disk('public')->url($path) : null;
     }
 
+    // "favicon" overrides "app_icon" when both are set — matches the field
+    // helper text in SystemSettings ("Overrides the app icon for browser tabs").
     protected static function resolveFaviconUrl(): ?string
     {
         try {
-            $path = Setting::get('favicon');
+            $path = Setting::get('favicon') ?: Setting::get('app_icon');
         } catch (\Throwable) {
             return null;
         }

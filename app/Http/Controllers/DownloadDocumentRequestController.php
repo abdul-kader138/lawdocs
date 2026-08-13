@@ -14,7 +14,7 @@ class DownloadDocumentRequestController extends Controller
         Gate::authorize('download', $documentRequest);
 
         abort_unless(
-            $documentRequest->status === 'completed' && $documentRequest->generated_docx_path,
+            $documentRequest->isReadyForDownload() && $documentRequest->generated_docx_path,
             404
         );
 
@@ -23,7 +23,13 @@ class DownloadDocumentRequestController extends Controller
             404
         );
 
-        $filename = Str::slug($documentRequest->generated_title ?: $documentRequest->precedent_title_snapshot) . '.docx';
+        $filename = Str::slug($documentRequest->generated_title ?: $documentRequest->precedent_title_snapshot).'.docx';
+
+        activity('document_request')
+            ->causedBy(auth()->user())
+            ->performedOn($documentRequest)
+            ->withProperties(['filename' => $filename, 'ip' => request()->ip()])
+            ->log('Downloaded generated document');
 
         return Storage::disk('local')->download($documentRequest->generated_docx_path, $filename);
     }

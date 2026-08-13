@@ -115,4 +115,16 @@ class DocumentRequestPolicy
     {
         return $this->view($user, $documentRequest);
     }
+
+    /**
+     * Determine whether the user can approve a completed document for
+     * download. Deliberately mirrors update() — approval authority is the
+     * same resource-level "manage document requests" permission, not a
+     * separate one. GenerateDocumentJob::notifyReviewersOfPendingApproval()
+     * already assumes this exact permission when finding who to notify.
+     */
+    public function approve(User $user, DocumentRequest $documentRequest): bool
+    {
+        return $this->update($user, $documentRequest);
+    }
 }

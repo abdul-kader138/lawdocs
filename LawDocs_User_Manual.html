@@ -1,0 +1,2944 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>LawDocs User Manual</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="manual.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">LawDocs User Manual</h1>
+<p class="subtitle">Professional operating guide</p>
+<p class="date">Version 1.2 · 13 August 2026</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#before-you-begin" id="toc-before-you-begin">1. Before you
+begin</a></li>
+<li><a href="#screen-map-and-navigation"
+id="toc-screen-map-and-navigation">2. Screen map and navigation</a></li>
+<li><a href="#sign-in-and-account-security"
+id="toc-sign-in-and-account-security">3. Sign in and account
+security</a></li>
+<li><a href="#dashboard" id="toc-dashboard">4. Dashboard</a></li>
+<li><a href="#clients-and-contacts" id="toc-clients-and-contacts">5.
+Clients and contacts</a></li>
+<li><a href="#documents-file-manager" id="toc-documents-file-manager">6.
+Documents file manager</a></li>
+<li><a href="#create-a-document-request-complete-walkthrough"
+id="toc-create-a-document-request-complete-walkthrough">7. Create a
+document request — complete walkthrough</a></li>
+<li><a href="#review-approval-and-download"
+id="toc-review-approval-and-download">8. Review, approval, and
+download</a></li>
+<li><a href="#signature-and-witness-tracking"
+id="toc-signature-and-witness-tracking">9. Signature and witness
+tracking</a></li>
+<li><a href="#precedent-management-operatoradministrator"
+id="toc-precedent-management-operatoradministrator">10. Precedent
+management (operator/administrator)</a></li>
+<li><a href="#user-administration-super-administrator"
+id="toc-user-administration-super-administrator">11. User administration
+(super administrator)</a></li>
+<li><a href="#audit-log-administrator"
+id="toc-audit-log-administrator">12. Audit Log (administrator)</a></li>
+<li><a href="#system-settings-super-administrator"
+id="toc-system-settings-super-administrator">13. System Settings (super
+administrator)</a></li>
+<li><a href="#troubleshooting" id="toc-troubleshooting">14.
+Troubleshooting</a></li>
+<li><a href="#data-and-audit-notes" id="toc-data-and-audit-notes">15.
+Data and audit notes</a></li>
+<li><a href="#daily-operating-checklist"
+id="toc-daily-operating-checklist">16. Daily operating
+checklist</a></li>
+</ul>
+</nav>
+<blockquote>
+<p><strong>Purpose.</strong> LawDocs is a staff-facing legal-document
+assembly system. It combines an approved Word precedent with client
+information, questionnaire answers, and party details to produce a draft
+DOCX and, where available, a PDF. It records review, signing, and
+witness activity; it does not provide legal advice, verify drafting, or
+send documents to an e-signature provider.</p>
+</blockquote>
+<h2 id="before-you-begin">1. Before you begin</h2>
+<h3 id="what-you-need">1.1 What you need</h3>
+<ul>
+<li>A LawDocs account and the URL supplied by your administrator (the
+standard panel path is <code>/admin</code>).</li>
+<li>A modern web browser.</li>
+<li>An authenticator app if two-factor authentication (2FA) is enabled
+for your account.</li>
+<li>Accurate client instructions and authority to handle the personal
+information entered.</li>
+</ul>
+<h3 id="roles-and-screen-access">1.2 Roles and screen access</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Role</th>
+<th>Normal access</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>panel_user</strong></td>
+<td>Dashboard; personal Documents drive; view/create document requests;
+view/create/update clients and contacts. Cannot delete clients or manage
+precedents.</td>
+</tr>
+<tr class="even">
+<td><strong>operator</strong></td>
+<td>All panel-user functions; personal Documents drive; full client
+management; precedent management; review/approval actions when
+permitted.</td>
+</tr>
+<tr class="odd">
+<td><strong>super_admin</strong></td>
+<td>Full access, including all users’ Documents drives, Audit Log, staff
+accounts, and System Settings.</td>
+</tr>
+</tbody>
+</table>
+<p>An administrator can restrict an operator to selected precedent
+categories. Menus and buttons the user lacks permission for are hidden.
+Your screen may therefore contain fewer items than this manual.</p>
+<h3 id="important-safeguards">1.3 Important safeguards</h3>
+<ol type="1">
+<li>Treat every generated document as a <strong>draft</strong> until
+reviewed under the firm’s procedure.</li>
+<li>A green <strong>Completed</strong> status means generation
+succeeded; it does not mean the document is legally correct.</li>
+<li><strong>Approve for Download</strong> records human approval but
+performs no automatic legal check.</li>
+<li>Minimum-age and witness messages are guidance only. Confirm
+jurisdiction-specific requirements with a solicitor.</li>
+<li><strong>Send for Signature</strong> is a tracking action only.
+Printing or e-signing occurs outside LawDocs.</li>
+</ol>
+<h2 id="screen-map-and-navigation">2. Screen map and navigation</h2>
+<p>After sign-in, the left navigation shows the areas available to your
+role:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Screen</th>
+<th>Purpose</th>
+<th>Main controls</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Dashboard</strong></td>
+<td>Workload summary and recent activity</td>
+<td>Time-range filter on chart; recent requests</td>
+</tr>
+<tr class="even">
+<td><strong>Document Requests</strong></td>
+<td>Create, monitor, approve, download, and track documents</td>
+<td>New Document Request, filters, row actions, View</td>
+</tr>
+<tr class="odd">
+<td><strong>Clients</strong></td>
+<td>Reusable client and related-contact records</td>
+<td>New Client, View, Edit, Delete (permission dependent)</td>
+</tr>
+<tr class="even">
+<td><strong>Documents</strong></td>
+<td>Private working-file manager for each user</td>
+<td>New folder/file, upload, download, rename, copy, move, delete</td>
+</tr>
+<tr class="odd">
+<td><strong>Precedents</strong></td>
+<td>Configure templates and dynamic questionnaires</td>
+<td>New Precedent, Edit, Active toggle (operator/admin)</td>
+</tr>
+<tr class="even">
+<td><strong>Users</strong></td>
+<td>Staff accounts, roles, and category restrictions</td>
+<td>New User, Edit, Delete (admin)</td>
+</tr>
+<tr class="odd">
+<td><strong>Administration → Audit Log</strong></td>
+<td>Read-only history of security and record activity</td>
+<td>Search, Area/Event/Date filters, View (admin permission)</td>
+</tr>
+<tr class="even">
+<td><strong>System Settings</strong></td>
+<td>Branding, output defaults, security, and email</td>
+<td>Tabs and Save (admin)</td>
+</tr>
+<tr class="odd">
+<td><strong>Profile menu</strong></td>
+<td>Your details, password, avatar, and 2FA</td>
+<td>Profile, notifications, Sign out</td>
+</tr>
+</tbody>
+</table>
+<p>Common table controls include search, sortable column headings,
+filters, column visibility, pagination, and per-row actions. A dash
+(<code>—</code>) means no value or that the item is not applicable.</p>
+<h2 id="sign-in-and-account-security">3. Sign in and account
+security</h2>
+<h3 id="screen-sign-in">Screen: Sign in</h3>
+<ol type="1">
+<li>Open the LawDocs <code>/admin</code> address.</li>
+<li>Enter <strong>Email address</strong> and
+<strong>Password</strong>.</li>
+<li>Select <strong>Remember me</strong> only on a private, trusted
+device.</li>
+<li>Select <strong>Sign in</strong>.</li>
+<li>If the account is protected by 2FA, the screen changes to
+<strong>Two-factor authentication</strong>. Enter either the current
+six-digit authenticator code or one unused recovery code, then select
+<strong>Verify</strong>.</li>
+<li>Use <strong>Back to login</strong> if you need to change the
+email/password entry.</li>
+</ol>
+<p>After five rapid unsuccessful authentication attempts, sign-in is
+temporarily rate-limited. Wait for the displayed period and try again.
+Do not repeatedly guess credentials.</p>
+<h3 id="screen-profile">Screen: Profile</h3>
+<p>Open the account menu at the top right and select
+<strong>Profile</strong>.</p>
+<ol type="1">
+<li>In <strong>Profile Picture</strong>, upload an image; use the image
+editor/circular crop if desired.</li>
+<li>In <strong>Personal Information</strong>, update your name or
+email.</li>
+<li>In <strong>Change Password</strong>, enter and confirm a new
+password. Leave both password fields blank to keep the existing
+password.</li>
+<li>Select <strong>Save changes</strong>.</li>
+</ol>
+<h3 id="enable-two-factor-authentication">Enable two-factor
+authentication</h3>
+<p>If the firm-wide 2FA switch is on:</p>
+<ol type="1">
+<li>On Profile, select <strong>Enable Two-Factor
+Authentication</strong>.</li>
+<li>Scan the QR code with Microsoft Authenticator, Google Authenticator,
+1Password, or another TOTP app. The text secret is available for manual
+entry.</li>
+<li>Enter the current six-digit code from the app.</li>
+<li>Confirm the setup.</li>
+<li>Select <strong>Show Recovery Codes</strong> and store the codes in
+an approved secure location. Each recovery code is single-use.</li>
+</ol>
+<p>Use <strong>Regenerate Recovery Codes</strong> if the set may be
+exposed; existing codes immediately stop working. Use <strong>Disable
+Two-Factor Authentication</strong> only in accordance with firm policy.
+If the administrator disables 2FA firm-wide, setup controls and login
+challenges are hidden even for previously enrolled accounts.</p>
+<h2 id="dashboard">4. Dashboard</h2>
+<h3 id="screen-dashboard">Screen: Dashboard</h3>
+<p>The welcome panel shows the signed-in user and a summary of today’s
+work. Four statistic cards show:</p>
+<ul>
+<li><strong>In Progress</strong> — requests in Pending or
+Processing.</li>
+<li><strong>Completed</strong> — drafts generated successfully.</li>
+<li><strong>Failed</strong> — requests with a generation error.</li>
+<li><strong>Awaiting Review</strong> — completed drafts whose precedents
+require approval and have not yet been approved.</li>
+</ul>
+<p>The <strong>Document Requests</strong> stacked chart groups Pending,
+Processing, Completed, and Failed items by date. Choose <strong>Last 7
+days</strong>, <strong>Last 14 days</strong>, or <strong>Last 30
+days</strong>. The <strong>Recent Document Requests</strong> table lists
+up to eight recent items with precedent, requester, status, and relative
+time. Dashboard figures refresh approximately every 30 seconds.</p>
+<p>Use the Dashboard to identify urgent failed generations and drafts
+awaiting review; open <strong>Document Requests</strong> for the
+operational actions.</p>
+<h2 id="clients-and-contacts">5. Clients and contacts</h2>
+<p>Creating a client once allows their details to prefill future
+requests when a precedent has client mapping configured. Client notes
+are internal and never inserted into a generated document.</p>
+<h3 id="screen-clients-list">Screen: Clients list</h3>
+<p>The list shows Name, Email, Phone, number of Contacts, and number of
+Documents. Search by name/email, sort a column, or use the row
+actions:</p>
+<ul>
+<li><strong>View</strong> — open the client and contacts.</li>
+<li><strong>Edit</strong> — correct the record.</li>
+<li><strong>Delete</strong> — available only with delete permission.
+Confirm carefully; related contacts are removed and existing document
+history may retain a blank client link.</li>
+</ul>
+<h3 id="screen-new-client-edit-client">Screen: New Client / Edit
+Client</h3>
+<ol type="1">
+<li>Select <strong>New Client</strong> (or <strong>Edit</strong> on an
+existing row).</li>
+<li>Under <strong>Identity</strong>, enter <strong>Full Name</strong>
+(required). Add Gender, Date of Birth, Email, and Phone where known.
+Gender is used for pronoun agreement when mapped to a document.</li>
+<li>Under <strong>Address</strong>, enter Street, Suburb, Australian
+State/Territory, and Postcode.</li>
+<li>Under <strong>Notes</strong>, add internal context only. Do not
+place wording here that is expected to appear in the document.</li>
+<li>Select <strong>Create</strong> or <strong>Save
+changes</strong>.</li>
+</ol>
+<p>The document wizard also permits creating a minimal client directly
+from the Client selector using name, email, and phone. For a complete
+record, create it from the Clients screen first.</p>
+<h3 id="screen-view-client-contacts-section">Screen: View Client —
+Contacts section</h3>
+<p>Contacts are reusable people associated with the client, such as a
+spouse, child, accountant, proposed attorney, beneficiary, or
+guardian.</p>
+<ol type="1">
+<li>Open a client and locate <strong>Contacts</strong>.</li>
+<li>Select <strong>Create</strong>.</li>
+<li>Enter <strong>Full Name</strong> (required) and, where available,
+Relationship to Client, Gender, Date of Birth, Email, Phone, address,
+and Notes.</li>
+<li>Select <strong>Create</strong>.</li>
+<li>Use the row <strong>Edit</strong> or <strong>Delete</strong> actions
+to maintain the contact.</li>
+</ol>
+<p>During document creation, contacts can be imported into compatible
+party groups. Matching fields such as name, relationship, gender, email,
+phone, address, and date of birth are copied; unmatched fields such as
+an estate share remain for manual completion.</p>
+<h2 id="documents-file-manager">6. Documents file manager</h2>
+<h3 id="purpose-and-access">Purpose and access</h3>
+<p>Select <strong>Documents</strong> in the navigation to open the
+private file manager. It is a working area for organising files and
+folders separately from generated Document Request downloads,
+signed-copy attachments, and precedent templates.</p>
+<p>Every normal user is restricted to their own document drive. A super
+administrator sees <strong>Viewing documents for</strong> and may choose
+<strong>My files</strong> or another user’s name/email to inspect and
+manage that user’s drive. Administrator actions are performed on the
+selected owner’s files, so confirm the selected user before uploading,
+moving, renaming, or deleting anything.</p>
+<p>The screen loads folders and files on demand and displays storage
+usage against the owner’s configured quota. The installation defaults
+are 2 GB per owner and 100 MB for one upload, but administrators may
+configure different limits; rely on the values/errors shown by the
+deployed system.</p>
+<h3 id="understand-the-file-manager-screen">Understand the file-manager
+screen</h3>
+<p>The exact toolbar/context-menu layout can vary with screen width, but
+the available operations are:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Operation</th>
+<th>What it does</th>
+<th>Important effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>New folder</strong></td>
+<td>Creates an organisational folder in the current location</td>
+<td>Duplicate names receive a numbered suffix</td>
+</tr>
+<tr class="even">
+<td><strong>New file</strong></td>
+<td>Creates a zero-byte placeholder file</td>
+<td>It is not an online Word/text editor</td>
+</tr>
+<tr class="odd">
+<td><strong>Upload</strong></td>
+<td>Copies a local file into the current folder</td>
+<td>Counts against owner quota and upload-size limit</td>
+</tr>
+<tr class="even">
+<td><strong>Download</strong></td>
+<td>Downloads the selected stored file</td>
+<td>Folders cannot be downloaded as files</td>
+</tr>
+<tr class="odd">
+<td><strong>Rename</strong></td>
+<td>Changes the file/folder’s visible name/path</td>
+<td>Folder descendants move with the renamed path</td>
+</tr>
+<tr class="even">
+<td><strong>Move</strong></td>
+<td>Relocates selected items to another folder</td>
+<td>A folder cannot be moved into itself/its descendant</td>
+</tr>
+<tr class="odd">
+<td><strong>Copy</strong></td>
+<td>Duplicates selected files/folders and their contents</td>
+<td>Copies use additional quota; collisions get numbered names</td>
+</tr>
+<tr class="even">
+<td><strong>Delete</strong></td>
+<td>Removes selected files/folders</td>
+<td>Folder deletion includes descendants and is not a recycle-bin
+action</td>
+</tr>
+</tbody>
+</table>
+<p>Use the toolbar, item context menu, or standard file-manager
+selection gestures exposed by the screen. Wait for an operation to
+finish before refreshing or repeating it.</p>
+<h3 id="create-a-folder-structure">Create a folder structure</h3>
+<ol type="1">
+<li>Open <strong>Documents</strong>.</li>
+<li>Administrators: confirm <strong>Viewing documents for</strong> is
+the intended owner.</li>
+<li>Navigate to the parent location where the folder belongs.</li>
+<li>Choose the new-folder action.</li>
+<li>Enter a clear name such as <code>SUL-2026-014</code> or
+<code>Current Precedents</code>.</li>
+<li>Confirm creation, then open the folder.</li>
+</ol>
+<p>Recommended structure example:</p>
+<pre class="text"><code>Client Matters
+└── SUL-2026-014
+    ├── Instructions
+    ├── Drafts
+    └── Executed</code></pre>
+<p>Use the firm’s approved naming convention. Do not include
+<code>/</code> in names; LawDocs removes path separators. If a name
+already exists, LawDocs creates a unique version such as
+<code>Draft (1).docx</code> rather than overwriting the existing
+item.</p>
+<h3 id="upload-a-file">Upload a file</h3>
+<ol type="1">
+<li>Open the destination folder before starting the upload.</li>
+<li>Choose <strong>Upload</strong>.</li>
+<li>Select the authorised local file.</li>
+<li>Retain or enter the intended filename.</li>
+<li>Confirm the upload and wait for the item to appear.</li>
+<li>Check the name, folder, file size, and storage-usage indicator.</li>
+<li>Download and open critical uploads once to confirm the correct file
+was stored.</li>
+</ol>
+<p>If the file exceeds the single-upload limit or would exceed the
+owner’s quota, the upload is rejected. Remove only genuinely redundant
+data under retention policy or ask an administrator to review capacity.
+Do not split sensitive documents across unapproved services.</p>
+<h3 id="download-a-file">Download a file</h3>
+<ol type="1">
+<li>Locate and select the file—not a folder.</li>
+<li>Choose <strong>Download</strong>.</li>
+<li>The browser opens/downloads the file in a new tab or according to
+browser settings.</li>
+<li>Store the downloaded copy only in an approved location and remove
+uncontrolled temporary copies when finished.</li>
+</ol>
+<h3 id="rename-move-or-copy">Rename, move, or copy</h3>
+<p><strong>Rename:</strong> select the item, choose Rename, enter the
+complete new name including the correct extension where applicable, and
+confirm. Renaming <code>draft.docx</code> to <code>draft.pdf</code>
+changes only the name, not the file format.</p>
+<p><strong>Move:</strong> select one or more items, choose Move, select
+the destination, and confirm. Moving a folder moves its entire subtree.
+Verify the destination afterwards.</p>
+<p><strong>Copy:</strong> select items, choose Copy, select the
+destination, and confirm. Files and all folder descendants are
+physically duplicated and count against quota. When a target name
+exists, LawDocs generates a unique numbered name.</p>
+<h3 id="delete-files-or-folders">Delete files or folders</h3>
+<ol type="1">
+<li>Confirm the selected owner, path, and exact items.</li>
+<li>Check the firm’s retention requirements and whether another record
+depends on the file.</li>
+<li>Select <strong>Delete</strong> and confirm.</li>
+<li>If deleting a folder, understand that every child file/folder is
+removed too.</li>
+</ol>
+<p>Deletion removes both the file-manager record and stored file; this
+screen has no recycle bin or restore action. Recovery, if possible at
+all, depends on separately managed backups. File creation, changes, and
+deletion are recorded in the Audit Log.</p>
+<h3 id="file-manager-troubleshooting">File-manager troubleshooting</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Could not load documents</td>
+<td>Session, server, storage, or network problem</td>
+<td>Refresh once; if repeated, report user, time, and screen error</td>
+</tr>
+<tr class="even">
+<td>Upload too large</td>
+<td>File exceeds configured maximum</td>
+<td>Use an approved smaller file or ask the administrator; do not bypass
+controls</td>
+</tr>
+<tr class="odd">
+<td>Storage quota exceeded</td>
+<td>Owner’s stored file total is at limit</td>
+<td>Review retention/capacity with an administrator</td>
+</tr>
+<tr class="even">
+<td>Expected file name has <code>(1)</code></td>
+<td>Same name already existed</td>
+<td>Compare files and rename deliberately; LawDocs avoided
+overwriting</td>
+</tr>
+<tr class="odd">
+<td>Cannot download</td>
+<td>Selected item is a folder, missing, or storage unavailable</td>
+<td>Select a file; report persistent failures</td>
+</tr>
+<tr class="even">
+<td>Administrator sees wrong files</td>
+<td>Wrong owner selected</td>
+<td>Stop and choose the correct user before making changes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="create-a-document-request-complete-walkthrough">7. Create a
+document request — complete walkthrough</h2>
+<h3 id="screen-document-requests-list">Screen: Document Requests
+list</h3>
+<p>The table shows Precedent, Client, Requested By, Status, Approval,
+Case Reference, and Requested date/time. Use the Client filter to narrow
+the list. Select <strong>New Document Request</strong> to begin.</p>
+<h3 id="step-1-of-3-precedent">Step 1 of 3: Precedent</h3>
+<ol type="1">
+<li>In <strong>Client (optional)</strong>, search for and select an
+existing client. This enables mapped prefilling and contact imports. You
+can leave it blank for an ad hoc matter.</li>
+<li>If the client is missing, use the create option in the selector for
+a minimal record, or cancel and create the full client from
+<strong>Clients</strong>.</li>
+<li>In <strong>Precedent</strong>, search for and choose the required
+document template. Only active precedents available to your role
+appear.</li>
+<li>Confirm the title and, through firm procedure, the correct
+jurisdiction/document type. Each jurisdiction is maintained as a
+separate precedent.</li>
+<li>Select <strong>Next</strong>.</li>
+</ol>
+<p>Changing the precedent resets its dynamic answers and party groups
+before applying any configured client prefill. Recheck every field after
+changing either selector.</p>
+<h4 id="how-the-selected-precedent-controls-the-request">How the
+selected precedent controls the request</h4>
+<p>The Precedent selection is not merely a file choice. It controls four
+connected parts of the request:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Precedent configuration</th>
+<th>What staff see or receive</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Questionnaire Fields</td>
+<td>The individual inputs on the Details step, such as Principal’s Full
+Name or Enduring Power of Attorney?</td>
+</tr>
+<tr class="even">
+<td>Client Mapping</td>
+<td>Which questionnaire inputs are prefilled from the selected
+client</td>
+</tr>
+<tr class="odd">
+<td>Party Groups</td>
+<td>Repeatable rows such as Beneficiaries, Attorneys, or Guardians,
+including minimum rows and share validation</td>
+</tr>
+<tr class="even">
+<td>Generator + Template File</td>
+<td>The clauses, conditional wording, repeated party wording,
+formatting, and final document title</td>
+</tr>
+</tbody>
+</table>
+<p>If an expected field or party group is missing from Details, stop. Do
+not force the information into an unrelated field. The precedent
+configuration must be corrected by an authorised operator before a
+reliable document can be generated.</p>
+<h3 id="step-2-of-3-details">Step 2 of 3: Details</h3>
+<p>The fields are generated from the selected precedent, so this screen
+varies. Required fields are marked. Inputs can be text, multi-line text,
+number, date, Yes/No, or a fixed-choice list.</p>
+<ol type="1">
+<li>Review all client-prefilled values against current instructions.
+Prefill is editable and is not proof that the information remains
+current.</li>
+<li>Complete each questionnaire field. Enter names exactly as they
+should appear in the legal document.</li>
+<li>For each party group, either:
+<ul>
+<li>select people in <strong>Import into [Group] from [Client]’s
+Contacts</strong>, then complete any missing values; or</li>
+<li>select <strong>Add [Group]</strong> and enter the party
+manually.</li>
+</ul></li>
+<li>Expand/collapse rows as needed and drag to reorder them. Order can
+affect the generated document.</li>
+<li>For beneficiary groups, make all shares total exactly
+<strong>100%</strong>. Submission is rejected otherwise.</li>
+<li>If <strong>Per stirpes substitution</strong> appears, enable it only
+where the instructions require the person’s share to pass to their
+surviving children if that person does not survive.</li>
+<li>If <strong>Specific Substitute</strong> appears, choose the intended
+replacement from another row. Avoid duplicate party names because
+substitute matching uses the displayed primary name.</li>
+<li>Select <strong>Next</strong>.</li>
+</ol>
+<h4 id="worked-request-example-power-of-attorney">Worked request
+example: Power of Attorney</h4>
+<p>Assume client <strong>Amara Osei</strong> is selected with a Power of
+Attorney precedent whose client mapping connects
+<code>Client name → principal_name</code> and
+<code>Client DOB → principal_dob</code>.</p>
+<ol type="1">
+<li>The Details screen prefills Principal’s Full Name as <strong>Amara
+Osei</strong> and the saved date of birth. Confirm both against current
+identification.</li>
+<li>Enter Principal’s Address as <strong>5 Bridge Road, Manly NSW
+2095</strong>.</li>
+<li>Set <strong>Enduring Power of Attorney?</strong> to Yes if the
+approved instructions require the enduring clause.</li>
+<li>Set <strong>Attorneys must act jointly?</strong> to No if the
+attorneys may act jointly and severally.</li>
+<li>Under Attorneys, add <strong>Kwame Osei</strong>, his address, and
+relationship <strong>Son</strong>.</li>
+<li>Add <strong>Linda Park</strong>, her address, and relationship
+<strong>Friend</strong>.</li>
+<li>Preserve the intended attorney order and continue to Review.</li>
+</ol>
+<p>With those values, a correctly configured template can repeat the
+appointment sentence once for each attorney, include the enduring
+notice, and choose the jointly-and-severally wording. The request screen
+supplies data; it does not decide whether those instructions are legally
+suitable.</p>
+<h4 id="worked-request-example-will-beneficiary-validation">Worked
+request example: Will beneficiary validation</h4>
+<p>For two beneficiaries, a valid setup could be:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Order</th>
+<th>Name</th>
+<th style="text-align: right;">Share</th>
+<th>Gender</th>
+<th>Per stirpes</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>David Sullivan</td>
+<td style="text-align: right;">60</td>
+<td>Male</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Emily Sullivan</td>
+<td style="text-align: right;">40</td>
+<td>Female</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>The total is 100%, so validation passes. The beneficiary clause
+repeats twice. The per-stirpes subclause appears only below David’s gift
+because his toggle is Yes. Entries of 60% and 30%, blank shares, or an
+accidental duplicate row prevent submission or produce incorrect
+instructions and must be corrected.</p>
+<h4 id="request-entry-quality-checks">Request-entry quality checks</h4>
+<p>Before leaving Details, confirm:</p>
+<ul>
+<li>names, accents, initials, and entity suffixes are exactly as
+intended;</li>
+<li>address text is complete and formatted for insertion into the
+document;</li>
+<li>all Yes/No answers match the signed instructions;</li>
+<li>no imported contact was added twice;</li>
+<li>row order reflects appointment/gift priority;</li>
+<li>each required minimum party count is satisfied;</li>
+<li>percentage shares total 100 where enforced;</li>
+<li>gender selections are correct because generators may use them for
+pronouns;</li>
+<li>optional fields are intentionally blank, not accidentally
+overlooked.</li>
+</ul>
+<h3 id="included-starter-precedents-and-their-data">Included starter
+precedents and their data</h3>
+<p>The repository provides these sample NSW precedents. A live
+installation may have different or additional active precedents.</p>
+<p><strong>Last Will and Testament</strong> captures testator name,
+optional date of birth, street, suburb/city, state wording, gender,
+executor name/gender, optional alternate executor name/gender, and one
+or more beneficiaries. Each beneficiary has name, estate share, gender,
+and optional per-stirpes treatment. Shares must total 100%.</p>
+<p><strong>Power of Attorney</strong> captures principal name, optional
+date of birth, address, whether the power is enduring, whether multiple
+attorneys act jointly, and one or more attorneys with name, address, and
+relationship.</p>
+<p><strong>Enduring Guardianship</strong> captures principal name,
+optional date of birth, address, whether multiple guardians act jointly,
+and one or more guardians with name, address, and relationship.</p>
+<p>These starter templates are explicitly demo content and require
+solicitor review before real-client use.</p>
+<h3 id="step-3-of-3-review">Step 3 of 3: Review</h3>
+<ol type="1">
+<li>Enter <strong>Case / Matter Reference</strong> if your filing
+convention uses one. It is optional but strongly recommended for
+retrieval.</li>
+<li>Read any age warning. An entered testator/principal date of birth
+below the ordinary minimum age produces a soft warning; it does not
+block submission because exceptions may exist.</li>
+<li>Return to <strong>Details</strong> and perform a final comparison
+with signed-off client instructions.</li>
+<li>Select <strong>Create</strong> / submit the wizard once. Generation
+normally takes about 10–30 seconds when synchronous processing is
+configured.</li>
+</ol>
+<p>The new request stores a snapshot of the precedent title,
+jurisdiction, answers, parties, requester, and time. It then moves
+through these statuses:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Status</th>
+<th>Meaning</th>
+<th>User response</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Pending</strong></td>
+<td>Accepted but not yet started</td>
+<td>Wait; if it remains pending unusually long, ask an administrator to
+check the queue worker.</td>
+</tr>
+<tr class="even">
+<td><strong>Processing</strong></td>
+<td>Draft is being assembled</td>
+<td>Wait and refresh later; do not submit duplicates.</td>
+</tr>
+<tr class="odd">
+<td><strong>Completed</strong></td>
+<td>DOCX was generated</td>
+<td>Review/approve if required, then download.</td>
+</tr>
+<tr class="even">
+<td><strong>Failed</strong></td>
+<td>Generation could not finish</td>
+<td>Open View, read Error, correct the precedent/input with an
+authorised person, then Regenerate.</td>
+</tr>
+</tbody>
+</table>
+<p>The notification bell is polled about every 30 seconds for
+completion/failure notifications.</p>
+<h3 id="what-happens-after-submission">What happens after
+submission</h3>
+<p>Submission saves the questionnaire answers separately from party
+rows. The generator then reads the selected precedent and combines:</p>
+<ol type="1">
+<li>generator-produced paragraphs, such as the Will executor appointment
+chain;</li>
+<li>verbatim tagged clauses from the uploaded DOCX;</li>
+<li>conditional blocks selected by Yes/No answers or computed
+flags;</li>
+<li>repeated blocks expanded once per stored party row; and</li>
+<li>placeholders replaced with request values.</li>
+</ol>
+<p>This explains why a request can be entered correctly but still fail
+when the precedent contains an unknown placeholder, a missing required
+clause, or a mismatched group key. Open the failed request and preserve
+its exact Error message for the precedent administrator.</p>
+<h2 id="review-approval-and-download">8. Review, approval, and
+download</h2>
+<h3 id="screen-document-request-view">Screen: Document Request view</h3>
+<p>Open <strong>View</strong> from the list. The
+<strong>Request</strong> section displays precedent, client, requester,
+case reference, generation status/error, generated title/time, approval
+status, and approver. <strong>Submitted Answers</strong> preserves the
+values used for generation.</p>
+<p>Use the following review procedure:</p>
+<ol type="1">
+<li>Compare <strong>Submitted Answers</strong> with source
+instructions.</li>
+<li>If permitted and the draft needs review, download or otherwise
+inspect it according to the firm’s controlled review process. The normal
+download buttons remain locked until approval for review-required
+precedents.</li>
+<li>A user with approval permission selects <strong>Approve for
+Download</strong> (or <strong>Approve</strong> on the list) and
+confirms. This records the approver and timestamp.</li>
+<li>Select <strong>Download .docx</strong> for the editable Word
+draft.</li>
+<li>Select <strong>Download PDF</strong> for a PDF rendition when the
+server’s office converter is available. If the button is absent,
+download DOCX and follow the firm’s approved conversion method.</li>
+</ol>
+<p>Download is available only when generation is Completed and either
+review is not required or approval has been recorded. A direct download
+link cannot bypass this rule.</p>
+<h3 id="regenerate-an-existing-request">Regenerate an existing
+request</h3>
+<p>Use <strong>Regenerate</strong> when a corrected version is
+required.</p>
+<ol type="1">
+<li>Open the existing request and select
+<strong>Regenerate</strong>.</li>
+<li>A new three-step request is opened with the existing client,
+precedent, answers, parties, and case reference prefilled where still
+valid.</li>
+<li>Verify all values—especially if the precedent has since
+changed.</li>
+<li>Correct the required data and submit.</li>
+<li>Treat the result as a new request with its own generation and
+approval history. The original remains available as an audit
+record.</li>
+</ol>
+<h2 id="signature-and-witness-tracking">9. Signature and witness
+tracking</h2>
+<p>The <strong>Signing</strong> section appears after the request is
+ready for download. Its status is <strong>Not sent</strong>,
+<strong>Sent for signature</strong>, or <strong>Signed</strong>.</p>
+<h3 id="record-sending">Record sending</h3>
+<ol type="1">
+<li>Complete approval/download checks.</li>
+<li>Send the document for wet signature or external e-signature using
+the firm’s normal process.</li>
+<li>In LawDocs select <strong>Send for Signature</strong> and confirm.
+This only saves the sent timestamp; it does not transmit the
+document.</li>
+</ol>
+<h3 id="record-witnesses">Record witnesses</h3>
+<ol type="1">
+<li>On the request view, locate the <strong>Witnesses</strong>
+table.</li>
+<li>Select <strong>Create</strong>.</li>
+<li>Enter Full Name (required), Address, and Occupation.</li>
+<li>Save. Add further witnesses as required.</li>
+<li>Compare the recorded count with the displayed jurisdiction guidance
+and confirm the actual legal requirement with a solicitor.</li>
+</ol>
+<p>LawDocs prevents a person already recorded as a document party from
+being entered as a witness. Use <strong>Edit</strong> or
+<strong>Delete</strong> to correct witness records.</p>
+<h3 id="mark-signed-and-attach-the-executed-copy">Mark signed and attach
+the executed copy</h3>
+<ol type="1">
+<li>Once signing is confirmed, select <strong>Mark as
+Signed</strong>.</li>
+<li>Optionally upload the wet-signed scan or externally e-signed copy
+under <strong>Executed Document</strong>.</li>
+<li>Confirm. The signed timestamp is recorded.</li>
+<li>If a file was attached, <strong>Download Signed Copy</strong>
+becomes available.</li>
+</ol>
+<h2 id="precedent-management-operatoradministrator">10. Precedent
+management (operator/administrator)</h2>
+<p>Precedent changes affect future generations and require controlled
+testing and solicitor approval. Existing request snapshots remain
+historical records.</p>
+<h3 id="screen-precedents-list">Screen: Precedents list</h3>
+<p>The list includes Title, Category, Jurisdiction, Active, Generator,
+questionnaire-field count, and creation date. Search/filter as
+available. The <strong>Active</strong> switch controls whether staff can
+select the precedent in a new request.</p>
+<h3 id="screen-newedit-precedent-details-tab">Screen: New/Edit Precedent
+— Details tab</h3>
+<ol type="1">
+<li>Enter Title, Category, and Jurisdiction.</li>
+<li>Choose the <strong>Document Generator</strong> that matches the
+document type. A developer must add new generator types.</li>
+<li>Add a clear Description.</li>
+<li>Set <strong>Active</strong> only after validation and approval.</li>
+<li>Leave <strong>Requires review before download</strong> on unless the
+firm has formally approved unreviewed release.</li>
+</ol>
+<h3 id="template-file-tab">Template File tab</h3>
+<p>The Template File is the most technically sensitive part of precedent
+setup. Build and test it in a non-production workflow. Only
+<code>.docx</code> files are accepted.</p>
+<h4 id="first-understand-what-this-word-file-isand-is-not">First
+understand what this Word file is—and is not</h4>
+<p>For the four included generators, LawDocs does <strong>not</strong>
+use the uploaded Word file as one complete mail-merge document. It reads
+only the content placed between recognised <code>[[CLAUSE:...]]</code>
+and <code>[[/CLAUSE]]</code> boundaries. The generator then places those
+named clause contents into a newly generated document together with
+headings and paragraphs produced by the application.</p>
+<p>This has four important consequences for a beginner:</p>
+<ol type="1">
+<li>Ordinary text typed outside a named clause is not automatically
+included in the final document.</li>
+<li>A clause name is a connection point between Word and the selected
+generator. It is not a heading visible to the client.</li>
+<li>The generator must request that exact clause name. A correctly
+spelled but unused clause will still not appear.</li>
+<li>The Word file supplies approved clause wording and formatting; the
+Questionnaire Fields and Party Groups supply variable data.</li>
+</ol>
+<p>Think of the process as:</p>
+<pre class="text"><code>Questionnaire answers + Party rows + Named Word clauses
+                         ↓
+                 Selected generator
+                         ↓
+                 New generated document</code></pre>
+<h4 id="do-not-begin-in-word-until-these-items-are-ready">Do not begin
+in Word until these items are ready</h4>
+<p>Before preparing the DOCX, complete or confirm:</p>
+<ol type="1">
+<li>The solicitor-approved clause wording for the correct
+jurisdiction.</li>
+<li>The correct <strong>Document Generator</strong> on the Details
+tab.</li>
+<li>The complete <strong>Questionnaire Fields</strong> list and exact
+field names.</li>
+<li>The complete <strong>Party Groups</strong> list, group keys, and row
+field names.</li>
+<li>Which passages are always included, conditional, or repeated.</li>
+<li>A test plan containing realistic but non-client data.</li>
+</ol>
+<p>If any technical name changes after the DOCX is built, every
+reference to that name must also change.</p>
+<h4 id="exact-clause-names-required-by-the-included-generators">Exact
+clause names required by the included generators</h4>
+<p>Use this table only for the included generator selected on the
+Details tab. Custom generators may require different names.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Selected generator</th>
+<th>Clause markers required by the generator</th>
+<th>Allowed repeat group</th>
+<th>Allowed IF conditions</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Will</strong></td>
+<td><code>revocation</code>, <code>beneficiaries_clause</code>,
+<code>executor_powers</code></td>
+<td><code>beneficiaries</code></td>
+<td><code>beneficiary.per_stirpes</code> inside the beneficiary
+repeat</td>
+</tr>
+<tr class="even">
+<td><strong>Power of Attorney</strong></td>
+<td><code>appointment_clause</code>, <code>enduring_notice</code>,
+<code>general_powers</code>, <code>revocation</code></td>
+<td><code>attorneys</code></td>
+<td><code>attorneys_act_jointly</code>, <code>is_enduring</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Enduring Guardianship</strong></td>
+<td><code>appointment_clause</code>, <code>guardian_functions</code>,
+<code>revocation</code></td>
+<td><code>guardians</code></td>
+<td><code>guardians_act_jointly</code></td>
+</tr>
+<tr class="even">
+<td><strong>Costs Agreement</strong></td>
+<td><code>the_work</code>, <code>our_fees</code>,
+<code>disbursements</code>, <code>billing_units_and_increases</code>,
+<code>fees_estimate</code>, <code>gst</code>, <code>interest</code>,
+<code>completion_estimate</code>, <code>billing_arrangements</code>,
+<code>itemised_bills</code>, <code>your_rights</code>,
+<code>costs_recovery_and_disputes</code>, <code>progress_reports</code>,
+<code>substantial_change</code>, <code>trust_money</code>,
+<code>authority_to_receive_moneys</code>,
+<code>costs_in_proceedings</code>,
+<code>engaging_another_practitioner</code>,
+<code>document_retention</code>, <code>company_signatories</code>,
+<code>legal_aid</code>, <code>suspension</code>,
+<code>termination</code>, <code>governing_law</code>,
+<code>email_communication</code>, <code>severability</code></td>
+<td><code>work_items</code></td>
+<td><code>estimate_completion_gst</code>,
+<code>estimate_fees_expenses_gst</code></td>
+</tr>
+</tbody>
+</table>
+<p>For example, when the Power of Attorney generator runs, it
+specifically asks for <code>appointment_clause</code>. Calling that
+block <code>attorney_appointment</code>, <code>appointment</code>, or
+<code>Appointment Clause</code> will not work.</p>
+<p>Every generator also accepts one further, optional clause not listed
+above: <code>front_matter</code>. All four generators otherwise open the
+document with a fixed, built-in introductory paragraph (for example, the
+Will’s “This is the last will and testament of…” sentence, or the Costs
+Agreement’s BETWEEN/AND/DATED lines and offer/acceptance wording).
+Tagging <code>[[CLAUSE:front_matter]]</code> in the DOCX replaces that
+built-in wording entirely with the precedent author’s own — leave it out
+to keep the built-in default. See “Example 7: optional front matter
+override” below.</p>
+<h4 id="how-to-type-a-marker-correctly-in-microsoft-word">How to type a
+marker correctly in Microsoft Word</h4>
+<p>Follow these literal steps for every marker line:</p>
+<ol type="1">
+<li>Open the approved DOCX in Microsoft Word and turn on <strong>Home →
+¶ Show/Hide</strong>. This makes paragraph boundaries visible.</li>
+<li>Click at the start of a new, empty paragraph.</li>
+<li>Type the marker using normal keyboard characters. For example:
+<code>[[CLAUSE:revocation]]</code>.</li>
+<li>Press <strong>Enter once</strong>. Do not press Shift+Enter;
+Shift+Enter creates a line break inside the same paragraph.</li>
+<li>Type or paste the approved clause wording in the following
+paragraph(s).</li>
+<li>At the end of the clause, press Enter to make another empty
+paragraph.</li>
+<li>Type <code>[[/CLAUSE]]</code> and press Enter.</li>
+<li>Leave marker paragraphs as plain body paragraphs. Do not make them
+list items, headers, footers, text boxes, table cells, comments, or
+tracked-deletion text.</li>
+<li>Save using <strong>File → Save As → Word Document
+(<code>.docx</code>)</strong>. Do not save as <code>.doc</code>, PDF,
+RTF, or an online-document shortcut.</li>
+</ol>
+<p>In Word with ¶ displayed, a correct three-paragraph clause
+conceptually looks like this:</p>
+<pre class="text"><code>[[CLAUSE:revocation]]¶
+I revoke all prior powers of attorney made by me.¶
+[[/CLAUSE]]¶</code></pre>
+<p>The <code>¶</code> symbols are displayed by Word; do not type them.
+The visible legal wording may contain multiple paragraphs or supported
+list items between the two boundary markers.</p>
+<h4 id="character-by-character-marker-rules">Character-by-character
+marker rules</h4>
+<ul>
+<li>Use two ordinary opening square brackets <code>[[</code> and two
+closing square brackets <code>]]</code>.</li>
+<li>Use a colon <code>:</code> after <code>CLAUSE</code>,
+<code>IF</code>, or <code>REPEAT</code>—not a semicolon or hyphen.</li>
+<li>Closing markers contain a forward slash <code>/</code>:
+<code>[[/CLAUSE]]</code>, <code>[[/IF]]</code>,
+<code>[[/REPEAT]]</code>.</li>
+<li>Clause names begin with a letter and use letters, digits, and
+underscores only. Use <code>general_powers</code>, not
+<code>general powers</code> or <code>general-powers</code>.</li>
+<li>Group keys and aliases use letters, digits, and underscores. Copy
+the group key from Party Groups rather than retyping from memory.</li>
+<li><code>AS</code> in a repeat is uppercase in the documented form:
+<code>[[REPEAT:attorneys AS attorney]]</code>.</li>
+<li>Placeholder braces are doubled:
+<code>{{answers.principal_name}}</code>. A single <code>{...}</code> is
+ordinary text and will not be replaced.</li>
+<li>Technical names are case-sensitive in practice. Always copy them
+exactly.</li>
+<li>Smart quotation marks are not part of any marker. Do not wrap a
+marker in quotes.</li>
+<li>Do not add a full stop after a boundary marker:
+<code>[[/CLAUSE]].</code> is wrong.</li>
+<li>Leading/trailing spaces are trimmed, but relying on them makes
+review harder. Keep marker lines clean.</li>
+</ul>
+<h4 id="correct-and-incorrect-word-paragraphs">Correct and incorrect
+Word paragraphs</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Correct</th>
+<th>Incorrect</th>
+<th>Why incorrect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>[[CLAUSE:revocation]]</code></td>
+<td><code>Revocation [[CLAUSE:revocation]]</code></td>
+<td>Boundary marker is not the entire paragraph</td>
+</tr>
+<tr class="even">
+<td><code>[[/CLAUSE]]</code></td>
+<td><code>[[/Clause]]</code></td>
+<td>Wrong capitalisation/text</td>
+</tr>
+<tr class="odd">
+<td><code>[[IF:is_enduring]]</code></td>
+<td><code>[[IF is_enduring]]</code></td>
+<td>Missing colon</td>
+</tr>
+<tr class="even">
+<td><code>[[/IF]]</code></td>
+<td><code>[[ENDIF]]</code></td>
+<td>Unsupported closing syntax</td>
+</tr>
+<tr class="odd">
+<td><code>[[REPEAT:attorneys AS attorney]]</code></td>
+<td><code>[[REPEAT:attorney AS attorneys]]</code></td>
+<td>Group and alias reversed/wrong group key</td>
+</tr>
+<tr class="even">
+<td><code>{{attorney.address}}</code></td>
+<td><code>{{attorneys.address}}</code></td>
+<td>Placeholder must use the alias declared after AS</td>
+</tr>
+<tr class="odd">
+<td><code>{{answers.principal_name}}</code></td>
+<td><code>{{answers.Principal's Full Name}}</code></td>
+<td>Must use field name, not screen label</td>
+</tr>
+<tr class="even">
+<td>Marker on its own normal paragraph</td>
+<td>Marker embedded in a bullet paragraph</td>
+<td>Control marker must occupy a clean paragraph</td>
+</tr>
+</tbody>
+</table>
+<h4 id="what-the-words-group-and-alias-mean">What the words “group” and
+“alias” mean</h4>
+<p>In <code>[[REPEAT:attorneys AS attorney]]</code>:</p>
+<ul>
+<li><code>attorneys</code> is the Party Group key. It represents the
+whole list of attorney rows saved in the request.</li>
+<li><code>attorney</code> is a temporary singular name for the one row
+currently being produced.</li>
+<li><code>{{attorney.name}}</code> reads the <code>name</code> field
+from that current row.</li>
+<li>After <code>[[/REPEAT]]</code>, the <code>attorney</code> alias no
+longer exists.</li>
+</ul>
+<p>The alias does not need to match the label shown to staff, but a
+clear singular alias prevents mistakes:
+<code>beneficiaries AS beneficiary</code>,
+<code>attorneys AS attorney</code>, and
+<code>guardians AS guardian</code>.</p>
+<h4 id="what-can-be-placed-inside-what">What can be placed inside
+what</h4>
+<p>Use this nesting order:</p>
+<pre class="text"><code>CLAUSE
+ ├─ ordinary paragraphs/list items/placeholders
+ ├─ IF ... optional ELSE ... /IF
+ └─ REPEAT
+     ├─ row placeholders using its alias
+     └─ IF for a row-specific flag
+        /IF
+    /REPEAT
+/CLAUSE</code></pre>
+<p><code>IF</code> and <code>REPEAT</code> controls must be inside a
+named CLAUSE. An <code>IF</code> may be placed inside a
+<code>REPEAT</code>, as in the beneficiary per-stirpes example. Close
+inner controls before outer controls. Never cross them.</p>
+<p>Correct closing order:</p>
+<pre class="text"><code>[[CLAUSE:beneficiaries_clause]]
+[[REPEAT:beneficiaries AS beneficiary]]
+[[IF:beneficiary.per_stirpes]]
+Conditional wording here.
+[[/IF]]
+[[/REPEAT]]
+[[/CLAUSE]]</code></pre>
+<p>Incorrect closing order:</p>
+<pre class="text"><code>[[CLAUSE:beneficiaries_clause]]
+[[REPEAT:beneficiaries AS beneficiary]]
+[[IF:beneficiary.per_stirpes]]
+Conditional wording here.
+[[/REPEAT]]
+[[/IF]]
+[[/CLAUSE]]</code></pre>
+<h4 id="safe-formatting-rules-inside-the-clause">Safe formatting rules
+inside the clause</h4>
+<ul>
+<li>Apply bold, italic, underline, and ordinary paragraph formatting to
+the legal wording, not to the marker lines.</li>
+<li>Use genuine Word numbered/bulleted lists when numbering must be
+preserved; do not simulate lists with spaces and manually typed numbers
+unless that is the approved design.</li>
+<li>Multi-level lists are supported within clauses, including
+repeated/conditional list items.</li>
+<li>Keep control markers out of tables. A table inside a marked clause
+is rejected by the current parser.</li>
+<li>Avoid text boxes, shapes, floating objects, headers, and footers for
+variable clause content; extracted preview may omit them.</li>
+<li>Accept/reject tracked changes and remove unresolved comments before
+upload. This reduces the risk of unintended or deleted wording entering
+the controlled template.</li>
+<li>Do not split a placeholder across differently formatted Word runs.
+Type/paste the complete token in one action and apply formatting to the
+entire token or containing sentence.</li>
+<li>Preserve an untouched approved master file outside LawDocs under the
+firm’s document-control procedure.</li>
+</ul>
+<h4 id="the-four-pieces-of-template-syntax">The four pieces of template
+syntax</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Syntax</th>
+<th>Purpose</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>[[CLAUSE:name]]</code> … <code>[[/CLAUSE]]</code></td>
+<td>Names a clause that the selected generator can retrieve</td>
+<td><code>[[CLAUSE:revocation]]</code></td>
+</tr>
+<tr class="even">
+<td><code>{{answers.field}}</code></td>
+<td>Inserts a questionnaire answer</td>
+<td><code>{{answers.principal_name}}</code></td>
+</tr>
+<tr class="odd">
+<td><code>[[IF:flag]]</code> … <code>[[ELSE]]</code> …
+<code>[[/IF]]</code></td>
+<td>Includes one branch according to a supported condition</td>
+<td><code>[[IF:is_enduring]]</code></td>
+</tr>
+<tr class="even">
+<td><code>[[REPEAT:group AS alias]]</code> …
+<code>[[/REPEAT]]</code></td>
+<td>Repeats content once for each party row</td>
+<td><code>[[REPEAT:attorneys AS attorney]]</code></td>
+</tr>
+</tbody>
+</table>
+<p>Every opening/closing control marker must occupy its own Word
+paragraph—the complete paragraph text, with no bullet, prefix, suffix,
+or comment. Write <code>[[CLAUSE:revocation]]</code>, not
+<code>Clause: [[CLAUSE:revocation]]</code>. Clause names cannot be
+duplicated or nested. Tables inside marked clauses are not supported.
+Normal text, bold styling, paragraphs, and multi-level Word lists inside
+supported clauses are preserved.</p>
+<h4 id="example-1-simple-named-clause">Example 1: simple named
+clause</h4>
+<p>Enter the following as three separate Word paragraphs:</p>
+<pre class="text"><code>[[CLAUSE:revocation]]
+I revoke all prior powers of attorney made by me.
+[[/CLAUSE]]</code></pre>
+<p>The marker lines do not appear in the generated document. The
+generator requests the clause named <code>revocation</code> and inserts
+the middle paragraph with its Word formatting. The clause name must be
+one expected by that generator; merely inventing a new name does not
+make the generator use it.</p>
+<h4 id="example-2-questionnaire-placeholder">Example 2: questionnaire
+placeholder</h4>
+<p>If Questionnaire Fields contains <code>principal_name</code> and
+<code>principal_address</code>, a clause can contain:</p>
+<pre class="text"><code>This Power of Attorney is made by {{answers.principal_name}} of {{answers.principal_address}}.</code></pre>
+<p>For a request containing <strong>Amara Osei</strong> and <strong>5
+Bridge Road, Manly NSW 2095</strong>, the generated text becomes:</p>
+<pre class="text"><code>This Power of Attorney is made by Amara Osei of 5 Bridge Road, Manly NSW 2095.</code></pre>
+<p>The spelling after <code>answers.</code> must exactly match the field
+name—not its staff-facing label. <code>{{answers.Principal Name}}</code>
+and <code>{{principal_name}}</code> are invalid. An unresolved
+placeholder fails generation rather than silently leaving a blank
+token.</p>
+<h4 id="example-3-conditional-wording-with-else">Example 3: conditional
+wording with ELSE</h4>
+<p>For the Power of Attorney generator, the supported
+<code>attorneys_act_jointly</code> flag can select one of two
+paragraphs:</p>
+<pre class="text"><code>[[IF:attorneys_act_jointly]]
+My Attorneys must act jointly in the exercise of this power.
+[[ELSE]]
+My Attorneys may act jointly and severally in the exercise of this power.
+[[/IF]]</code></pre>
+<p>If the request answer is Yes, only the first paragraph is generated.
+If No, only the ELSE paragraph is generated. Without an
+<code>[[ELSE]]</code>, a false condition produces no content. Use only
+flags listed in <strong>Available flags &amp; party groups for this
+generator</strong>; an unknown condition fails
+validation/generation.</p>
+<h4 id="example-4-optional-enduring-clause">Example 4: optional enduring
+clause</h4>
+<pre class="text"><code>[[CLAUSE:enduring_notice]]
+[[IF:is_enduring]]
+This Power of Attorney continues to have effect even if I lose capacity.
+[[/IF]]
+[[/CLAUSE]]</code></pre>
+<p>When <strong>Enduring Power of Attorney?</strong> is Yes, the
+sentence is included. When No, the named clause expands to no visible
+content. The legal wording remains the precedent author’s
+responsibility.</p>
+<h4 id="example-5-repeat-attorney-rows">Example 5: repeat attorney
+rows</h4>
+<p>The Party Groups tab defines group key <code>attorneys</code> with
+fields <code>name</code>, <code>address</code>, and
+<code>relationship</code>. The template may contain:</p>
+<pre class="text"><code>[[CLAUSE:appointment_clause]]
+[[REPEAT:attorneys AS attorney]]
+I appoint {{attorney.name}} of {{attorney.address}} to be my Attorney.
+[[/REPEAT]]
+[[/CLAUSE]]</code></pre>
+<p>For two party rows—Kwame Osei and Linda Park—the appointment sentence
+is produced twice in the same order as the request rows.
+<code>attorneys</code> must exactly match the Party Group key and a
+group supported by the generator. <code>attorney</code> is the local
+alias used only inside this repeat. A placeholder such as
+<code>{{attorney.name}}</code> outside its repeat is out of scope and
+fails generation.</p>
+<h4
+id="example-6-nested-repeat-and-conditional-beneficiary-wording">Example
+6: nested repeat and conditional beneficiary wording</h4>
+<p>For a <code>beneficiaries</code> group with fields <code>name</code>,
+<code>share</code>, and the enabled per-stirpes option:</p>
+<pre class="text"><code>[[CLAUSE:beneficiaries_clause]]
+[[REPEAT:beneficiaries AS beneficiary]]
+I give {{beneficiary.share}}% of my estate to {{beneficiary.name}}.
+[[IF:beneficiary.per_stirpes]]
+If {{beneficiary.name}} does not survive me, that share passes to their surviving children in equal shares.
+[[/IF]]
+[[/REPEAT]]
+[[/CLAUSE]]</code></pre>
+<p>With David at 60%/per-stirpes Yes and Emily at 40%/per-stirpes No,
+both gift sentences are produced, but the survival paragraph appears
+only for David. The application supports this nesting. The exact legal
+language above is an explanatory example, not approved precedent
+wording.</p>
+<h4 id="example-7-optional-front-matter-override">Example 7: optional
+front matter override</h4>
+<p>Every generator opens the document with a fixed, built-in
+introductory paragraph unless the precedent tags its own
+<code>front_matter</code> clause. For the Will generator:</p>
+<pre class="text"><code>[[CLAUSE:front_matter]]
+This is the last will and testament of {{answers.testator_name}} of
+{{answers.testator_street}}, {{answers.testator_suburb}} in the
+{{answers.testator_state}}.
+[[/CLAUSE]]</code></pre>
+<p>If <code>front_matter</code> is present, the generator uses only this
+wording in place of its built-in sentence — the rest of the document
+(Structure sections, clauses) is unaffected. If
+<code>front_matter</code> is absent, nothing changes from the previous
+behaviour. This is the one place besides an ordinary named clause where
+a firm can put its own approved opening wording under full
+document-control, without a developer.</p>
+<p>For the Costs Agreement generator specifically,
+<code>front_matter</code> also has access to
+<code>{{answers.agreement_date}}</code> — today’s date, formatted as it
+would appear in the built-in BETWEEN/AND/DATED lines. This value is
+generated automatically each time the document is produced; it is not a
+Questionnaire Field and does not need to be added to Questionnaire
+Fields.</p>
+<h4
+id="configuration-to-template-matching-checklist">Configuration-to-template
+matching checklist</h4>
+<p>Before upload, cross-check every technical identifier:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>In configuration</th>
+<th>Must match in DOCX</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Questionnaire field <code>principal_name</code></td>
+<td><code>{{answers.principal_name}}</code></td>
+</tr>
+<tr class="even">
+<td>Party Group key <code>attorneys</code></td>
+<td><code>[[REPEAT:attorneys AS attorney]]</code></td>
+</tr>
+<tr class="odd">
+<td>Party field <code>address</code></td>
+<td><code>{{attorney.address}}</code> inside that repeat</td>
+</tr>
+<tr class="even">
+<td>Per-stirpes support enabled</td>
+<td><code>[[IF:beneficiary.per_stirpes]]</code> where supported</td>
+</tr>
+<tr class="odd">
+<td>Generator’s required clause <code>appointment_clause</code></td>
+<td><code>[[CLAUSE:appointment_clause]]</code> exactly once</td>
+</tr>
+</tbody>
+</table>
+<h4 id="upload-and-validation-procedure">Upload and validation
+procedure</h4>
+<ol type="1">
+<li>On <strong>Details</strong>, select the correct Document Generator
+first.</li>
+<li>Return to <strong>Template File</strong> and read <strong>Available
+flags &amp; party groups for this generator</strong>. Treat it as the
+allowed vocabulary for IF and REPEAT markers.</li>
+<li>Upload the DOCX.</li>
+<li>Read <strong>Clause Marker Check</strong>. Correct every unclosed,
+duplicate, nested, stray, unknown flag/group/field, or
+unsupported-structure message; then upload the corrected version.</li>
+<li>Inspect <strong>Extracted Text (preview)</strong>. It is a flattened
+reference view (<code>#</code> headings and <code>-</code> list items),
+not an exact visual preview. Empty/missing text can indicate unsupported
+tables or text boxes.</li>
+<li>Save the precedent as inactive while testing.</li>
+<li>Create representative requests covering every branch: Yes and No
+conditions, one and multiple party rows, optional fields blank and
+filled, per-stirpes on/off, and boundary share values.</li>
+<li>Review both generated DOCX and PDF for wording, ordering, numbering,
+formatting, missing content, and unresolved tokens.</li>
+<li>Obtain the required solicitor/firm approval, then activate the
+precedent.</li>
+</ol>
+<h4
+id="beginner-walkthrough-build-a-power-of-attorney-docx-from-a-blank-file">Beginner
+walkthrough: build a Power of Attorney DOCX from a blank file</h4>
+<p>This walkthrough is for learning the mechanics. Replace every example
+sentence with approved wording before production.</p>
+<p><strong>Part A — configure LawDocs first</strong></p>
+<ol type="1">
+<li>Create/edit the precedent and select <strong>Power of
+Attorney</strong> as Document Generator.</li>
+<li>On Questionnaire Fields, confirm these exact field names:
+<code>principal_name</code>, <code>principal_address</code>,
+<code>is_enduring</code>, and <code>attorneys_act_jointly</code>. The
+included setup also uses optional <code>principal_dob</code>.</li>
+<li>On Party Groups, create key <code>attorneys</code> with row fields
+<code>name</code>, <code>address</code>, and <code>relationship</code>;
+set minimum rows to 1.</li>
+<li>Save the precedent with <strong>Active off</strong>.</li>
+</ol>
+<p><strong>Part B — prepare the DOCX</strong></p>
+<ol type="1">
+<li>Open a blank Word document and enable ¶ Show/Hide.</li>
+<li>Type each line below as its own paragraph. After every marker line,
+press Enter—not Shift+Enter.</li>
+</ol>
+<pre class="text"><code>[[CLAUSE:appointment_clause]]
+[[REPEAT:attorneys AS attorney]]
+I appoint {{attorney.name}} of {{attorney.address}} to be my Attorney.
+[[/REPEAT]]
+[[IF:attorneys_act_jointly]]
+My Attorneys must act jointly in the exercise of this power.
+[[ELSE]]
+My Attorneys may act jointly and severally in the exercise of this power.
+[[/IF]]
+[[/CLAUSE]]
+
+[[CLAUSE:enduring_notice]]
+[[IF:is_enduring]]
+This Power of Attorney is intended to continue if I lose capacity.
+[[/IF]]
+[[/CLAUSE]]
+
+[[CLAUSE:general_powers]]
+Approved general powers wording goes here.
+[[/CLAUSE]]
+
+[[CLAUSE:revocation]]
+Approved revocation wording goes here.
+[[/CLAUSE]]</code></pre>
+<ol start="3" type="1">
+<li>Use blank ordinary paragraphs between clauses only for editing
+readability; do not place an extra marker outside a clause.</li>
+<li>Apply the approved formatting to the legal-content paragraphs.</li>
+<li>Save as <code>Power-of-Attorney-NSW-v1.docx</code>. A controlled
+filename is helpful, although LawDocs uses the stored precedent
+title/record rather than the filename to select it.</li>
+</ol>
+<p><strong>Part C — upload and perform the first check</strong></p>
+<ol type="1">
+<li>In LawDocs, open the Template File tab and upload the DOCX.</li>
+<li>Wait for the upload/save operation to complete.</li>
+<li>If <strong>Clause Marker Check</strong> contains any text, treat it
+as a failed check. Do not activate the precedent.</li>
+<li>In <strong>Extracted Text</strong>, confirm all four clause names’
+content is represented and the legal paragraphs are in the expected
+order.</li>
+<li>If content is missing, simplify the Word structure and remove text
+boxes/tables before uploading a corrected file.</li>
+</ol>
+<p><strong>Part D — test every branch</strong></p>
+<p>Create at least these four requests with fictional data:</p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 25%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Test</th>
+<th style="text-align: right;">Attorneys</th>
+<th>Enduring?</th>
+<th>Act jointly?</th>
+<th>Expected result</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td style="text-align: right;">One</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>One appointment; enduring paragraph included; joint wording
+included</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td style="text-align: right;">One</td>
+<td>No</td>
+<td>No</td>
+<td>One appointment; enduring paragraph absent; joint-and-several
+wording included</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td style="text-align: right;">Two</td>
+<td>Yes</td>
+<td>No</td>
+<td>Two appointments in entered order; enduring paragraph;
+joint-and-several wording</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td style="text-align: right;">Two</td>
+<td>No</td>
+<td>Yes</td>
+<td>Two appointments; no enduring paragraph; joint wording</td>
+</tr>
+</tbody>
+</table>
+<p>For every generated document, inspect the DOCX—not only the extracted
+preview. Search the output for <code>[[</code>, <code>]]</code>,
+<code>{{</code>, and <code>}}</code>; none should remain. Check
+headings, page breaks, numbering, punctuation, singular/plural wording,
+blank sections, and PDF conversion.</p>
+<h4 id="how-to-respond-to-common-clause-marker-check-messages">How to
+respond to common Clause Marker Check messages</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Message meaning</th>
+<th>Typical mistake</th>
+<th>Correction</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Clause never closed</td>
+<td><code>[[CLAUSE:...]]</code> exists but no later
+<code>[[/CLAUSE]]</code></td>
+<td>Add the closing marker on its own paragraph</td>
+</tr>
+<tr class="even">
+<td>Closing marker has no matching opener</td>
+<td>Extra <code>[[/CLAUSE]]</code>, <code>[[/IF]]</code>, or
+<code>[[/REPEAT]]</code></td>
+<td>Remove it or add the correct opener in the proper order</td>
+</tr>
+<tr class="odd">
+<td>Duplicate clause</td>
+<td>Same clause name used twice</td>
+<td>Combine the content into one named clause; each name appears
+once</td>
+</tr>
+<tr class="even">
+<td>Nested clause markers</td>
+<td>A new CLAUSE begins before the previous CLAUSE closes</td>
+<td>Close the first clause; clauses cannot contain clauses</td>
+</tr>
+<tr class="odd">
+<td>Unknown flag</td>
+<td>IF name is misspelled or unsupported by the generator</td>
+<td>Copy an allowed flag from the on-screen reference</td>
+</tr>
+<tr class="even">
+<td>Unknown party group</td>
+<td>REPEAT key differs from Party Groups/generator</td>
+<td>Copy the exact group key, such as <code>attorneys</code></td>
+</tr>
+<tr class="odd">
+<td>Namespace/alias not in scope</td>
+<td>Placeholder uses <code>attorney</code> outside its repeat or uses a
+different alias</td>
+<td>Move it inside the repeat or correct the alias</td>
+</tr>
+<tr class="even">
+<td>Unknown field</td>
+<td>Placeholder field is not defined for answers/group rows</td>
+<td>Correct the name or add/configure the intended field
+consistently</td>
+</tr>
+<tr class="odd">
+<td>Tables not supported inside clauses</td>
+<td>Legal content inside a Word table between clause markers</td>
+<td>Redesign it as supported paragraphs/lists or obtain a
+developer-supported solution</td>
+</tr>
+</tbody>
+</table>
+<h4 id="if-upload-passes-but-generation-still-fails">If upload passes
+but generation still fails</h4>
+<ol type="1">
+<li>Open the failed Document Request and copy the exact
+<strong>Error</strong> text.</li>
+<li>Do not keep resubmitting the same request.</li>
+<li>Confirm the request contains all required answers and minimum party
+rows.</li>
+<li>Confirm the precedent still uses the intended generator and uploaded
+file.</li>
+<li>Compare the error’s clause/placeholder name with Questionnaire
+Fields, Party Groups, and the DOCX.</li>
+<li>Correct the inactive precedent, re-upload it, and repeat the
+complete test matrix.</li>
+<li>Use <strong>Regenerate</strong> from the original request only after
+the configuration is corrected; verify all copied values before
+submission.</li>
+</ol>
+<h4 id="final-activation-sign-off-checklist">Final activation sign-off
+checklist</h4>
+<p>Do not switch <strong>Active</strong> on until each item is Yes:</p>
+<ul>
+<li>correct document category and jurisdiction;</li>
+<li>correct generator selected;</li>
+<li>exact required clause names present once each;</li>
+<li>all markers use their own paragraphs and close in the correct
+order;</li>
+<li>Clause Marker Check is empty;</li>
+<li>extracted preview contains the expected wording;</li>
+<li>all questionnaire placeholders match configured field names;</li>
+<li>all repeat groups/aliases/row fields match configuration;</li>
+<li>every Yes/No and row-count test has been generated;</li>
+<li>DOCX formatting and PDF conversion have been visually reviewed;</li>
+<li>no marker tokens or sample data remain in output;</li>
+<li>solicitor/authorised reviewer has approved the legal wording;</li>
+<li>controlled version/source and approval evidence have been
+retained.</li>
+</ul>
+<p>Do not activate a precedent with a marker error, unreliable
+extraction, untested conditional branch, or unreviewed output.</p>
+<h3 id="structure-tab">Structure tab</h3>
+<p>The Structure tab controls which sections a generated document
+contains, their order, their headings, and whether each one is shown —
+without a developer touching code. Leave it empty to use the selected
+generator’s built-in default section list, unchanged.</p>
+<h4 id="add-or-reorder-a-section-step-by-step">Add or reorder a section
+step by step</h4>
+<ol type="1">
+<li>Select <strong>Add section</strong>.</li>
+<li>Enter <strong>Section heading</strong> — the visible text, for
+example <code>Beneficiaries</code>. Do not type a number; numbering is
+automatic and always renumbers sequentially, skipping any section that
+is hidden by its condition.</li>
+<li>Choose <strong>Content source</strong>:
+<ul>
+<li><strong>Clause tag (from the .docx)</strong> — the normal case.
+Enter the exact <code>[[CLAUSE:...]]</code> tag name in <strong>Clause
+tag</strong>.</li>
+<li><strong>Computed block (from the generator)</strong> — only for the
+small number of sections a generator computes in code rather than
+reading from a clause tag (for example, the Will’s executor-appointment
+paragraph). Enter the exact key shown under <strong>Computed
+blocks</strong> in the Template File tab’s on-screen reference.</li>
+</ul></li>
+<li>Optionally enter <strong>Show only if</strong> using the same
+<code>[[IF:...]]</code>-style flag name grammar as inside the DOCX, to
+hide the section entirely when the condition is false. Leave blank to
+always show it.</li>
+<li>Drag sections into the required order. Collapse each item once
+configured.</li>
+<li>Save the precedent. <strong>Clause Marker Check</strong>
+re-validates every Structure entry against the uploaded DOCX and the
+selected generator — an unknown tag, unknown computed-block key, or
+unknown condition flag is reported the same way as a DOCX marker
+error.</li>
+<li>Generate a test request and confirm the section order, headings,
+numbering, and visibility match expectations.</li>
+</ol>
+<h4 id="what-structure-can-and-cannot-do">What Structure can and cannot
+do</h4>
+<ul>
+<li>It can add, remove, reorder, rename (via heading text), and
+conditionally show/hide whole sections, for any of the four included
+generators.</li>
+<li>It cannot invent a new condition flag, party group, or
+computed-block key that the selected generator does not already
+advertise — those still require a developer. The Structure tab only
+re-arranges vocabulary the generator already exposes.</li>
+<li>It does not control a generator’s fixed opening wording — use an
+optional <code>front_matter</code> clause tag for that (see “Example 7:
+optional front matter override” above).</li>
+<li>Leaving Structure empty is not a stripped-down mode — it simply uses
+the generator’s own built-in default order, which is exactly what every
+precedent used before Structure existed.</li>
+</ul>
+<h3 id="formatting-tab">Formatting tab</h3>
+<p>The Formatting tab sets the font and heading style for this
+precedent’s generated documents, overriding the firm-wide default set in
+System Settings → Document Defaults (see Section 13). Leave any field
+blank to keep using that firm-wide default.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Font Family</strong></td>
+<td>Base font name for the generated document, for example
+<code>Times New Roman</code>.</td>
+</tr>
+<tr class="even">
+<td><strong>Font Size (pt)</strong></td>
+<td>Base body text size, 8–24pt.</td>
+</tr>
+<tr class="odd">
+<td><strong>Heading Weight</strong></td>
+<td>Bold or Not bold for every generated heading in this document.</td>
+</tr>
+<tr class="even">
+<td><strong>Heading Size Step (pt per level)</strong></td>
+<td>How many points larger each heading level is than the one below it —
+0 makes every heading level the same size.</td>
+</tr>
+</tbody>
+</table>
+<p>Formatting only affects generator-authored text: headings,
+<code>front_matter</code>, and computed blocks. Text captured verbatim
+from inside a <code>[[CLAUSE:...]]</code> block always keeps whatever
+formatting it has in the uploaded DOCX (bold, italic, paragraph spacing,
+list styles), unaffected by this tab — that has not changed. Use
+Formatting when one document type needs to look different from the rest
+of the firm’s output (for example, a costs agreement printed in a
+smaller size to fit on fewer pages); use the DOCX’s own Word styles for
+anything inside a clause.</p>
+<h3 id="questionnaire-fields-tab">Questionnaire Fields tab</h3>
+<p>Questionnaire Fields create the single-value inputs that staff see on
+Step 2, <strong>Details</strong>, of a Document Request. Use them for
+facts that normally occur once per document: the principal’s name,
+document date, address, a Yes/No instruction, or a fixed selection.</p>
+<p>Do not use a Questionnaire Field for a list of people. Use a Party
+Group for attorneys, beneficiaries, guardians, or any other role that
+may have several rows.</p>
+<h4 id="add-a-questionnaire-field-step-by-step">Add a questionnaire
+field step by step</h4>
+<ol type="1">
+<li>Select <strong>Add field</strong>.</li>
+<li>Enter <strong>Field name</strong>. This is the permanent technical
+name used by the template and generator, for example
+<code>principal_name</code>.</li>
+<li>Enter <strong>Staff-facing label</strong>, for example
+<strong>Principal’s Full Name</strong>. This is what document-request
+users read.</li>
+<li>Select <strong>Input type</strong>.</li>
+<li>Set <strong>Required</strong> on when a request must not be
+submitted without a value.</li>
+<li>For Select inputs, add each permitted stored value and displayed
+label under <strong>Choices</strong>.</li>
+<li>Enter <strong>Description (for reference)</strong> explaining what
+the value means and how the generator uses it.</li>
+<li>Collapse the item when complete, add further fields, and drag them
+into the order staff should complete them.</li>
+<li>Save the precedent, create a test request, and confirm labels,
+order, validation, and choices.</li>
+</ol>
+<h4 id="bulk-import-fields-from-csv">Bulk import fields from CSV</h4>
+<p>Adding fields one at a time is fine for a handful of fields, but a
+new precedent with twenty or more fields is faster to set up from a
+spreadsheet. Select <strong>Import Fields from CSV</strong> at the top
+of the precedent edit screen.</p>
+<ol type="1">
+<li>Prepare a CSV with the header row
+<code>name,label,type,required,description,options</code>.</li>
+<li>One row per field:
+<ul>
+<li><code>name</code> — the technical field name (same rules as typing
+it by hand: lowercase, starts with a letter, letters/numbers/underscores
+only).</li>
+<li><code>label</code> — the staff-facing label.</li>
+<li><code>type</code> — one of <code>text</code>, <code>textarea</code>,
+<code>number</code>, <code>date</code>, <code>boolean</code>,
+<code>select</code>.</li>
+<li><code>required</code> —
+<code>yes</code>/<code>true</code>/<code>1</code> or
+<code>no</code>/<code>false</code>/<code>0</code>. Leave the column out
+of the CSV entirely to default every row to required, matching a new
+field’s own default.</li>
+<li><code>description</code> — the reference note explaining the
+field.</li>
+<li><code>options</code> — only for <code>select</code> fields:
+pipe-separated <code>value=Label</code> pairs, for example
+<code>male=Male|female=Female</code>. Leave blank for any other
+type.</li>
+</ul></li>
+<li>Upload the file and confirm.</li>
+<li>LawDocs validates every row against the same rules as the on-screen
+form. A row that fails (bad name format, missing label/description, an
+unrecognised type) is skipped, not silently accepted — the confirmation
+notice lists exactly which rows were skipped and why. Fix the CSV and
+re-import to retry only the corrected rows.</li>
+<li>A row whose <code>name</code> matches a field that already exists on
+this precedent updates that field in place rather than creating a
+duplicate; a genuinely new name is appended. If the same name appears
+twice within one CSV, the later row wins.</li>
+<li>After import, the Questionnaire Fields list on screen updates
+immediately — check the order, labels, and choices, then save and test a
+request as usual.</li>
+</ol>
+<p>CSV import is a faster way to fill in the same Questionnaire Fields
+tab described above — it does not create a different kind of field, and
+every field it creates is fully editable afterwards through the normal
+on-screen controls.</p>
+<h4 id="choose-the-correct-input-type">Choose the correct input
+type</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Use it for</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Text</strong></td>
+<td>One short line</td>
+<td>Full name, suburb, reference wording</td>
+</tr>
+<tr class="even">
+<td><strong>Textarea</strong></td>
+<td>Several lines</td>
+<td>Special instructions or a long address, only if the
+generator/template expects it</td>
+</tr>
+<tr class="odd">
+<td><strong>Number</strong></td>
+<td>Numeric value</td>
+<td>Age or amount; use Party Group share fields for distributed
+percentages</td>
+</tr>
+<tr class="even">
+<td><strong>Date</strong></td>
+<td>A calendar date</td>
+<td>Date of birth</td>
+</tr>
+<tr class="odd">
+<td><strong>Yes / No</strong></td>
+<td>A true/false instruction</td>
+<td>Enduring power? Attorneys act jointly?</td>
+</tr>
+<tr class="even">
+<td><strong>Select</strong></td>
+<td>One value from a controlled list</td>
+<td>Gender or another fixed legal option</td>
+</tr>
+</tbody>
+</table>
+<p>For a Select field such as <code>principal_gender</code>, Choices may
+be:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Value saved by LawDocs</th>
+<th>Label shown to staff</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>male</code></td>
+<td>Male</td>
+</tr>
+<tr class="even">
+<td><code>female</code></td>
+<td>Female</td>
+</tr>
+</tbody>
+</table>
+<p>The stored value can be used by generator logic, so do not change it
+casually after production use. Labels may be clearer for staff, but
+changes still require testing.</p>
+<h4 id="worked-questionnaire-example">Worked questionnaire example</h4>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field name</th>
+<th>Staff-facing label</th>
+<th>Type</th>
+<th>Required</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>principal_name</code></td>
+<td>Principal’s Full Name</td>
+<td>Text</td>
+<td>Yes</td>
+<td>Used in document title/opening text</td>
+</tr>
+<tr class="even">
+<td><code>principal_dob</code></td>
+<td>Principal’s Date of Birth</td>
+<td>Date</td>
+<td>No</td>
+<td>Client record and age guidance</td>
+</tr>
+<tr class="odd">
+<td><code>principal_address</code></td>
+<td>Principal’s Address</td>
+<td>Text</td>
+<td>Yes</td>
+<td>Used in opening text</td>
+</tr>
+<tr class="even">
+<td><code>is_enduring</code></td>
+<td>Enduring Power of Attorney?</td>
+<td>Yes/No</td>
+<td>Yes</td>
+<td>Controls enduring wording</td>
+</tr>
+<tr class="odd">
+<td><code>attorneys_act_jointly</code></td>
+<td>Attorneys must act jointly?</td>
+<td>Yes/No</td>
+<td>Yes</td>
+<td>Controls joint versus joint-and-several wording</td>
+</tr>
+</tbody>
+</table>
+<p>In a DOCX clause, <code>principal_name</code> would be referenced as
+<code>{{answers.principal_name}}</code>. The screen label
+<strong>Principal’s Full Name</strong> is never placed inside the
+braces.</p>
+<h4 id="field-name-rules-and-change-control">Field-name rules and change
+control</h4>
+<ul>
+<li>Begin with a lowercase letter.</li>
+<li>Use only lowercase letters, numbers, and underscores.</li>
+<li>Use a clear subject prefix: <code>principal_address</code> is safer
+than the vague <code>address</code>.</li>
+<li>Never include spaces, punctuation, apostrophes, or hyphens.</li>
+<li>Do not create two fields with the same name.</li>
+<li>Treat a saved field name like a database key, not editable display
+wording.</li>
+</ul>
+<p>Renaming or deleting a field can break client mappings, DOCX
+placeholders, generator logic, tests, and regeneration of old requests.
+Before changing one, search every configuration/template reference, keep
+the precedent inactive, and repeat all test cases.</p>
+<h4 id="what-questionnaire-fields-cannot-do">What Questionnaire Fields
+cannot do</h4>
+<p>The current screen creates an ordered list of inputs; it does not
+provide an administrator button for arbitrary visual subheadings or
+collapsible form sections within the Details step. If the goal is a
+dynamic <strong>document</strong> section, use the supported clause/IF
+method described under “Create a dynamic document section.” If the goal
+is a new custom <strong>screen</strong> section or new
+generator-controlled behaviour, developer work is required.</p>
+<h3 id="client-mapping-tab">Client Mapping tab</h3>
+<p>Client Mapping connects a reusable Client record to the Questionnaire
+Fields of this specific precedent. It saves retyping and reduces
+spelling errors; it does not lock or verify the value.</p>
+<p>The left side is fixed Client data: Full Name, DOB, Gender, Email,
+Phone, Street, Suburb, State, and Postcode. Each selector on the right
+lists the Questionnaire Fields already created for this precedent.</p>
+<h4 id="configure-client-mapping-step-by-step">Configure client mapping
+step by step</h4>
+<ol type="1">
+<li>Complete and save the Questionnaire Fields first.</li>
+<li>Open <strong>Client Mapping</strong>.</li>
+<li>For <strong>Client’s Full Name</strong>, choose the questionnaire
+field that means the same thing—for example
+<code>principal_name</code>.</li>
+<li>For <strong>Date of Birth</strong>, choose
+<code>principal_dob</code>.</li>
+<li>Continue only where there is a true semantic match.</li>
+<li>Leave <strong>Not mapped</strong> for client values the document
+does not request.</li>
+<li>Save the precedent.</li>
+<li>Create or open a fictional client with known values.</li>
+<li>Start a new Document Request, select that client and this precedent,
+and confirm the intended fields prefill.</li>
+<li>Change the client selector and the precedent selector during
+testing; confirm the correct values are reapplied and recheck all
+answers.</li>
+</ol>
+<h4 id="example-mapping">Example mapping</h4>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Client attribute</th>
+<th>Map to questionnaire field</th>
+<th>Result on request</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Client’s Full Name</td>
+<td><code>principal_name</code></td>
+<td>Principal’s Full Name prefills</td>
+</tr>
+<tr class="even">
+<td>Date of Birth</td>
+<td><code>principal_dob</code></td>
+<td>Principal’s Date of Birth prefills</td>
+</tr>
+<tr class="odd">
+<td>Street</td>
+<td><code>principal_street</code> if such a field exists</td>
+<td>Street prefills separately</td>
+</tr>
+<tr class="even">
+<td>Email</td>
+<td>Not mapped</td>
+<td>Email remains unused by this request</td>
+</tr>
+</tbody>
+</table>
+<p>Mapping Street to <code>principal_address</code> would copy only the
+street value, not automatically build a full address from Street,
+Suburb, State, and Postcode. Either create separate questionnaire fields
+and use them as designed, maintain a suitable complete-address field
+through approved changes, or have staff enter the full address manually.
+Do not map several Client attributes to one target in the hope that
+LawDocs will concatenate them.</p>
+<h4 id="mapping-safety-rules">Mapping safety rules</h4>
+<ul>
+<li>Map like to like: name to name, DOB to DOB, gender to gender.</li>
+<li>Never map a client phone number into an address or document
+instruction field merely because both are Text inputs.</li>
+<li>Mapping is precedent-specific. <code>testator_name</code> may be
+correct for a Will, while <code>principal_name</code> is correct for a
+Power of Attorney.</li>
+<li>Empty client attributes do not overwrite a field with useful data,
+but staff must still review the request.</li>
+<li>Prefilled fields remain editable. A user can correct a changed
+address for the current request; update the Client record too when
+appropriate.</li>
+<li>Client Mapping does not import related people. Contacts are imported
+through Party Groups on the request screen.</li>
+</ul>
+<h3 id="party-groups-tab">Party Groups tab</h3>
+<p>Party Groups create repeatable sets of structured rows on the
+Document Request. Use a group whenever users may need to add one, two,
+or many people/items of the same role.</p>
+<p>Examples are Beneficiaries, Attorneys, Guardians, or Executors. Each
+group can be repeated in the Word clause using
+<code>[[REPEAT:...]]</code>.</p>
+<h4 id="add-a-party-group-step-by-step">Add a party group step by
+step</h4>
+<ol type="1">
+<li>Select <strong>Add party group</strong>.</li>
+<li>Enter <strong>Group key</strong>, such as <code>attorneys</code>.
+This is the permanent technical plural name.</li>
+<li>Enter <strong>Staff-facing label</strong>, such as
+<strong>Attorneys</strong>.</li>
+<li>Select <strong>Role type</strong>: Beneficiary, Executor, Guardian,
+Attorney, or Custom.</li>
+<li>Enter <strong>Min rows</strong>. Use 1 when at least one party is
+mandatory; use 0 only when the entire group is optional.</li>
+<li>Enter <strong>Max rows</strong>, or leave blank for no application
+maximum.</li>
+<li>If percentage distribution applies, enter <strong>Share field
+name</strong> matching one row field, such as <code>share</code>.</li>
+<li>Enable <strong>Supports substitute</strong> only when rows can
+designate a specific fallback.</li>
+<li>Enable <strong>Supports per-stirpes</strong> only when that concept
+is appropriate and supported by the generator/template.</li>
+<li>Under <strong>Fields captured per row</strong>, add the data
+required for one party.</li>
+<li>Save and test minimum/maximum rows, contact import, row ordering,
+validation, and generated repetition.</li>
+</ol>
+<h4 id="example-attorneys-group">Example: Attorneys group</h4>
+<p>Group-level settings:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Group key</td>
+<td><code>attorneys</code></td>
+</tr>
+<tr class="even">
+<td>Label</td>
+<td>Attorneys</td>
+</tr>
+<tr class="odd">
+<td>Role type</td>
+<td>Attorney</td>
+</tr>
+<tr class="even">
+<td>Min rows</td>
+<td>1</td>
+</tr>
+<tr class="odd">
+<td>Max rows</td>
+<td>blank</td>
+</tr>
+<tr class="even">
+<td>Share field</td>
+<td>blank</td>
+</tr>
+<tr class="odd">
+<td>Supports substitute</td>
+<td>Off</td>
+</tr>
+<tr class="even">
+<td>Supports per-stirpes</td>
+<td>Off</td>
+</tr>
+</tbody>
+</table>
+<p>Row fields:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Field name</th>
+<th>Row-facing label</th>
+<th>Type</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>name</code></td>
+<td>Attorney’s Full Name</td>
+<td>Text</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td><code>address</code></td>
+<td>Attorney’s Address</td>
+<td>Text</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td><code>relationship</code></td>
+<td>Relationship to Principal</td>
+<td>Text</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>The DOCX connection is:</p>
+<pre class="text"><code>[[REPEAT:attorneys AS attorney]]
+I appoint {{attorney.name}} of {{attorney.address}} to be my Attorney.
+[[/REPEAT]]</code></pre>
+<p>If staff enter three attorney rows, the sentence is generated three
+times in the displayed row order.</p>
+<h4 id="example-beneficiaries-group-with-shares">Example: Beneficiaries
+group with shares</h4>
+<p>Configure group key <code>beneficiaries</code>, label Beneficiaries,
+minimum 1, and Share field <code>share</code>. Add row fields
+<code>name</code>, <code>share</code>, and <code>gender</code>. Enable
+per-stirpes only when the Will generator/template supports it.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Beneficiary row</th>
+<th><code>name</code></th>
+<th style="text-align: right;"><code>share</code></th>
+<th><code>per_stirpes</code></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>David Sullivan</td>
+<td style="text-align: right;">60</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Emily Sullivan</td>
+<td style="text-align: right;">40</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<p>Because Share field is <code>share</code>, the application requires
+all rows to total exactly 100. The per-stirpes toggle is automatically
+added to each row when support is enabled; do not also create a manual
+field named <code>per_stirpes</code>.</p>
+<h4 id="bulk-import-row-fields-from-csv">Bulk import row fields from
+CSV</h4>
+<p>Row fields within a party group can be bulk-imported the same way
+Questionnaire Fields can (see “Bulk import fields from CSV” above),
+using <strong>Import Party Group Fields from CSV</strong> at the top of
+the precedent edit screen. The one difference is an extra required
+column, <code>group_key</code>, identifying which existing party group
+each row belongs to.</p>
+<ol type="1">
+<li>Create the party group itself first, on this tab, with its key,
+label, and role settings — the CSV only fills in a group’s <strong>row
+fields</strong>, it does not create the group.</li>
+<li>Prepare a CSV with the header row
+<code>group_key,name,label,type,required,description,options</code>.</li>
+<li><code>group_key</code> must exactly match an existing group’s key on
+this precedent, for example <code>attorneys</code>. A row whose
+<code>group_key</code> does not match any existing group is skipped,
+with the reason given in the confirmation notice — it is not used to
+create a new group.</li>
+<li>The remaining columns (<code>name</code>, <code>label</code>,
+<code>type</code>, <code>required</code>, <code>description</code>,
+<code>options</code>) follow the same rules as the Questionnaire Fields
+CSV import.</li>
+<li>One CSV can define row fields for several different groups at once —
+each row’s <code>group_key</code> routes it to the correct group. A row
+whose <code>name</code> matches a field already present in that same
+group updates it in place; a new name is appended to that group’s field
+list. Fields in a group not mentioned in the CSV are left
+untouched.</li>
+</ol>
+<h4 id="party-field-and-contact-import-design">Party field and
+contact-import design</h4>
+<p>Contacts are imported by matching standard field names. Fields such
+as <code>name</code>, <code>relationship</code>, <code>gender</code>,
+<code>email</code>, <code>phone</code>, <code>address</code>,
+<code>street</code>, <code>suburb</code>, <code>state</code>,
+<code>postcode</code>, and <code>dob</code> can receive matching saved
+contact data. A custom name such as
+<code>attorney_full_legal_name</code> will not automatically match the
+contact’s standard <code>name</code> value.</p>
+<p>Imported rows remain editable. Fields with no matching Client Contact
+value—such as <code>share</code>—remain blank and must be completed.</p>
+<h4 id="party-group-safety-rules">Party Group safety rules</h4>
+<ul>
+<li>Group keys are plural and stable; aliases in Word are normally
+singular.</li>
+<li>Row field names use lowercase letters, numbers, and underscores
+only.</li>
+<li>The Share field setting must exactly match an existing numeric row
+field.</li>
+<li>Minimum/maximum values control the request UI; they do not decide
+substantive legal suitability.</li>
+<li>Row order is persisted and can affect generated wording.</li>
+<li>Avoid duplicate primary names when using Specific Substitute because
+name matching may be ambiguous.</li>
+<li>Do not enable substitute/per-stirpes controls unless the selected
+generator and approved clause wording consume them.</li>
+<li>Changing a group key or field name requires updating every REPEAT,
+alias placeholder, generator expectation, and test.</li>
+</ul>
+<h3 id="create-a-dynamic-document-section">Create a dynamic document
+section</h3>
+<p>“Dynamic section” can mean three different things in LawDocs:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Desired result</th>
+<th>Configuration to use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Add a new input dynamically to the request Details step</td>
+<td>Add a Questionnaire Field</td>
+</tr>
+<tr class="even">
+<td>Add a repeatable block of people/items to the request</td>
+<td>Add a Party Group</td>
+</tr>
+<tr class="odd">
+<td>Include, exclude, or repeat wording in the generated document</td>
+<td>Use a supported named CLAUSE with IF and/or REPEAT markers</td>
+</tr>
+</tbody>
+</table>
+<p>There is no generic <strong>Add Dynamic Section</strong> button. The
+chosen generator controls which named clauses and IF flags are
+available. If a new section needs a flag or clause the generator does
+not advertise, an administrator cannot invent it in the UI; a developer
+must extend the generator first.</p>
+<h4
+id="example-a-dynamic-yesno-document-section-using-an-existing-flag">Example
+A: dynamic Yes/No document section using an existing flag</h4>
+<p>Goal: show an Enduring Power Notice only when the user answers Yes to
+<strong>Enduring Power of Attorney?</strong></p>
+<ol type="1">
+<li><strong>Questionnaire Fields:</strong> create
+<code>is_enduring</code>, label <strong>Enduring Power of
+Attorney?</strong>, type Yes/No, Required on.</li>
+<li><strong>Generator:</strong> select Power of Attorney. Its on-screen
+reference lists <code>is_enduring</code> as an allowed IF condition. The
+required-clause table in this manual confirms that this generator uses
+<code>enduring_notice</code> (custom generators require developer
+documentation).</li>
+<li><strong>Template File:</strong> enter:</li>
+</ol>
+<pre class="text"><code>[[CLAUSE:enduring_notice]]
+[[IF:is_enduring]]
+Approved enduring notice wording goes here.
+[[/IF]]
+[[/CLAUSE]]</code></pre>
+<ol start="4" type="1">
+<li>Test request 1 with Yes: the section wording must appear.</li>
+<li>Test request 2 with No: the wording must be absent; check that an
+unwanted blank paragraph/page is not created.</li>
+</ol>
+<p>This is dynamic because a request answer controls whether the clause
+has visible content.</p>
+<h4 id="example-b-dynamic-alternative-wording-using-ifelse">Example B:
+dynamic alternative wording using IF/ELSE</h4>
+<p>Goal: choose joint or joint-and-several wording.</p>
+<ol type="1">
+<li>Create Questionnaire Field <code>attorneys_act_jointly</code>, type
+Yes/No, Required on.</li>
+<li>Confirm Power of Attorney lists it as an allowed flag.</li>
+<li>Inside <code>appointment_clause</code>, add:</li>
+</ol>
+<pre class="text"><code>[[IF:attorneys_act_jointly]]
+Approved wording for attorneys who must act jointly.
+[[ELSE]]
+Approved wording for attorneys who may act jointly and severally.
+[[/IF]]</code></pre>
+<ol start="4" type="1">
+<li>Generate one Yes and one No test and compare both outputs with
+approved wording.</li>
+</ol>
+<h4 id="example-c-dynamic-repeated-section-using-a-party-group">Example
+C: dynamic repeated section using a Party Group</h4>
+<p>Goal: generate one appointment paragraph for every attorney.</p>
+<ol type="1">
+<li>Create Party Group key <code>attorneys</code> with fields
+<code>name</code>, <code>address</code>, and
+<code>relationship</code>.</li>
+<li>Confirm the Power of Attorney generator lists <code>attorneys</code>
+as an allowed group.</li>
+<li>Put this inside <code>appointment_clause</code>:</li>
+</ol>
+<pre class="text"><code>[[REPEAT:attorneys AS attorney]]
+I appoint {{attorney.name}} of {{attorney.address}} to be my Attorney.
+[[/REPEAT]]</code></pre>
+<ol start="4" type="1">
+<li>Test zero rows (the request should be blocked when Min rows is 1),
+one row, and several rows.</li>
+<li>Confirm the output count and order exactly match the request
+rows.</li>
+</ol>
+<h4
+id="example-d-request-input-dynamically-prefilled-from-a-client">Example
+D: request input dynamically prefilled from a client</h4>
+<p>Goal: prefill Principal’s Full Name without retyping.</p>
+<ol type="1">
+<li>Create Questionnaire Field <code>principal_name</code>.</li>
+<li>In Client Mapping, map Client’s Full Name to
+<code>principal_name</code>.</li>
+<li>In the request wizard, select a saved Client and the configured
+precedent.</li>
+<li>Confirm Principal’s Full Name is prefilled but still editable.</li>
+<li>The generator can use the answer directly, and a marked clause can
+reference it as <code>{{answers.principal_name}}</code> where
+supported.</li>
+</ol>
+<h4 id="dynamic-section-verification-matrix">Dynamic-section
+verification matrix</h4>
+<p>For every dynamic section, document and test:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Test question</th>
+<th>Evidence required</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>What field/group controls it?</td>
+<td>Exact technical name recorded</td>
+</tr>
+<tr class="even">
+<td>Does the selected generator support it?</td>
+<td>Name visible in generator reference or developer confirmation</td>
+</tr>
+<tr class="odd">
+<td>What happens when true/filled?</td>
+<td>Expected paragraph(s) visible</td>
+</tr>
+<tr class="even">
+<td>What happens when false/blank?</td>
+<td>Expected alternative or no section; no stray heading/page</td>
+</tr>
+<tr class="odd">
+<td>What happens with one/many rows?</td>
+<td>Correct count, order, numbering, and grammar</td>
+</tr>
+<tr class="even">
+<td>Does client mapping prefill correctly?</td>
+<td>Test client produces expected editable values</td>
+</tr>
+<tr class="odd">
+<td>Are DOCX and PDF both correct?</td>
+<td>Visual sign-off for all branches</td>
+</tr>
+</tbody>
+</table>
+<h3 id="complete-worked-configuration-power-of-attorney">Complete worked
+configuration: Power of Attorney</h3>
+<p>This example shows how all tabs connect.</p>
+<ol type="1">
+<li><strong>Details:</strong> Title = Power of Attorney; Category =
+power of attorney; Jurisdiction = NSW; Generator = Power of Attorney;
+Requires review = On; Active = Off during setup.</li>
+<li><strong>Questionnaire Fields:</strong> add
+<code>principal_name</code> (Text, required), <code>principal_dob</code>
+(Date, optional), <code>principal_address</code> (Text, required),
+<code>is_enduring</code> (Yes/No, required), and
+<code>attorneys_act_jointly</code> (Yes/No, required).</li>
+<li><strong>Client Mapping:</strong> map Client Full Name to
+<code>principal_name</code> and Date of Birth to
+<code>principal_dob</code>. Other attributes may remain unmapped unless
+equivalent questionnaire fields exist.</li>
+<li><strong>Party Groups:</strong> key <code>attorneys</code>, label
+Attorneys, role Attorney, minimum 1; add fields <code>name</code>
+(required Text), <code>address</code> (required Text), and
+<code>relationship</code> (optional Text).</li>
+<li><strong>Template File:</strong> provide exactly named clauses
+expected by the generator—<code>appointment_clause</code>,
+<code>enduring_notice</code>, <code>general_powers</code>, and
+<code>revocation</code>. Inside <code>appointment_clause</code>, repeat
+<code>attorneys AS attorney</code> and use
+<code>{{attorney.name}}</code>/<code>{{attorney.address}}</code>. Use
+the supported <code>attorneys_act_jointly</code> IF/ELSE. Inside
+<code>enduring_notice</code>, use <code>[[IF:is_enduring]]</code>.</li>
+<li>Save, inspect Clause Marker Check and extracted preview, then
+generate test cases for one attorney/Yes enduring, two attorneys/No
+enduring, jointly Yes, and jointly No.</li>
+<li>Confirm output and approval before switching Active on.</li>
+</ol>
+<p>The safest design sequence is <strong>generator → questionnaire
+fields → party groups → client mapping → DOCX markers → test requests →
+approval → activation</strong>. Changing a technical key later requires
+checking every downstream reference.</p>
+<h2 id="user-administration-super-administrator">11. User administration
+(super administrator)</h2>
+<h3 id="screen-users-list-new-user-edit-user">Screen: Users list / New
+User / Edit User</h3>
+<ol type="1">
+<li>Select <strong>New User</strong>.</li>
+<li>Enter Name, unique valid Email, Password (minimum eight characters),
+and Confirm Password.</li>
+<li>Assign one or more roles. Avoid granting <code>super_admin</code>
+unless full control is required.</li>
+<li>Under <strong>Precedent Access</strong>, optionally restrict an
+operator to categories. A blank selection means unrestricted; it does
+not mean no access.</li>
+<li>Select <strong>Create</strong>.</li>
+</ol>
+<p>When editing, leave Password blank to retain it. The list can be
+searched, sorted, filtered by role, and displays verification status.
+Deleting an account is consequential; preserve required request/audit
+ownership under firm policy before deletion.</p>
+<h2 id="audit-log-administrator">12. Audit Log (administrator)</h2>
+<h3 id="purpose-access-and-integrity">Purpose, access, and
+integrity</h3>
+<p>Open <strong>Administration → Audit Log</strong>. It is a
+chronological, read-only record used to investigate record changes,
+access-control changes, authentication activity, and document-file
+activity. It is visible only to users granted Audit Log view
+permissions—normally super administrators.</p>
+<p>Audit entries cannot be created, edited, or deleted from this screen.
+This protects the value of the trail. The log supports operational
+investigation and accountability, but it is not automatically proof of
+legal compliance and does not replace the firm’s formal monitoring,
+retention, or incident-response processes.</p>
+<h3 id="screen-audit-log-list">Screen: Audit Log list</h3>
+<p>The newest entry appears first. Columns are:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>When</strong></td>
+<td>Server-recorded date and time to the second</td>
+</tr>
+<tr class="even">
+<td><strong>Area</strong></td>
+<td>Activity category, such as <code>auth</code>,
+<code>access_control</code>, <code>document</code>, <code>client</code>,
+<code>precedent</code>, or <code>document_request</code></td>
+</tr>
+<tr class="odd">
+<td><strong>Activity</strong></td>
+<td>Human-readable description, such as User logged in or a model was
+updated</td>
+</tr>
+<tr class="even">
+<td><strong>By</strong></td>
+<td>User who caused the event; <strong>System</strong> when no
+authenticated actor is associated</td>
+</tr>
+<tr class="odd">
+<td><strong>On</strong></td>
+<td>Type of affected record, such as Client, Document, User, or
+DocumentRequest</td>
+</tr>
+<tr class="even">
+<td><strong>Event</strong></td>
+<td>Created, Updated, Deleted, or another activity type</td>
+</tr>
+</tbody>
+</table>
+<p>Use search for words in <strong>Activity</strong>. Sort by When/Area
+where offered, or use filters:</p>
+<ul>
+<li><strong>Area</strong> — show one activity category.</li>
+<li><strong>Event</strong> — Created, Updated, or Deleted.</li>
+<li><strong>From / Until</strong> — inclusive calendar-date range.</li>
+</ul>
+<h3 id="find-an-event-step-by-step">Find an event step by step</h3>
+<p>Example: determine who changed a precedent during a known week.</p>
+<ol type="1">
+<li>Expand <strong>Administration</strong> and open <strong>Audit
+Log</strong>.</li>
+<li>Open Filters.</li>
+<li>Set <strong>Area</strong> to <code>precedent</code>.</li>
+<li>Set <strong>Event</strong> to Updated.</li>
+<li>Set <strong>From</strong> and <strong>Until</strong> to the
+investigation dates.</li>
+<li>Apply the filters.</li>
+<li>Review When, Activity, By, and On.</li>
+<li>Select <strong>View</strong> on the relevant row for exact
+details.</li>
+<li>Record the audit entry URL/identifier and findings according to firm
+procedure; do not alter business records merely to make the log look
+cleaner.</li>
+</ol>
+<p>Clear or reset filters before starting a different investigation. An
+empty result may mean the filters are too narrow, the event is outside
+retention, activity logging was unavailable/disabled, or the action is
+not among the instrumented events.</p>
+<h3 id="screen-view-audit-log-entry">Screen: View Audit Log Entry</h3>
+<p>The <strong>Activity</strong> section displays:</p>
+<ul>
+<li><strong>When</strong> — exact recorded timestamp;</li>
+<li><strong>Area</strong> — source category;</li>
+<li><strong>Activity</strong> — event description;</li>
+<li><strong>Performed by</strong> — actor or System;</li>
+<li><strong>On</strong> — affected model and numeric record ID, for
+example <code>Client #24</code>;</li>
+<li><strong>IP address</strong> — when the event captured a request
+IP.</li>
+</ul>
+<p>The <strong>Changed values</strong> section appears when attribute
+changes were recorded:</p>
+<ul>
+<li><strong>Before</strong> shows old stored values.</li>
+<li><strong>After</strong> shows new stored values.</li>
+</ul>
+<p>The <strong>Other properties</strong> section appears for additional
+context, such as assigned role/permission names, authentication guard,
+or email entered during a failed login.</p>
+<h3 id="interpret-common-audit-areas">Interpret common audit areas</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Area/event</th>
+<th>What it normally records</th>
+<th>Example investigation use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>auth</code></td>
+<td>Successful login, logout, failed login; IP and guard where
+captured</td>
+<td>Review suspicious sign-in attempts</td>
+</tr>
+<tr class="even">
+<td><code>access_control</code></td>
+<td>Roles or permissions assigned/removed</td>
+<td>Confirm who granted elevated access</td>
+</tr>
+<tr class="odd">
+<td><code>user</code></td>
+<td>Staff-account field changes</td>
+<td>Review account/profile administration</td>
+</tr>
+<tr class="even">
+<td><code>client</code> / related records</td>
+<td>Client/contact creation and changes</td>
+<td>Identify who corrected personal data</td>
+</tr>
+<tr class="odd">
+<td><code>precedent</code></td>
+<td>Template configuration changes</td>
+<td>Trace a field, generator, or activation change</td>
+</tr>
+<tr class="even">
+<td><code>document_request</code> / parties/witnesses</td>
+<td>Request lifecycle and related-record changes</td>
+<td>Reconstruct approval/signing-data activity</td>
+</tr>
+<tr class="odd">
+<td><code>document</code></td>
+<td>File Manager record creation, rename/move/path changes, copy
+creation, deletion</td>
+<td>Trace working-file management</td>
+</tr>
+<tr class="even">
+<td><code>setting</code></td>
+<td>System-setting changes</td>
+<td>Review security, branding, mail, or generation settings</td>
+</tr>
+</tbody>
+</table>
+<p>Area names reflect the underlying activity configuration and can
+differ after custom development.</p>
+<h3 id="before-and-after-example">Before-and-after example</h3>
+<p>An Updated precedent entry might show:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Before</th>
+<th>After</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>is_active: false</code></td>
+<td><code>is_active: true</code></td>
+<td>The precedent was activated</td>
+</tr>
+<tr class="even">
+<td><code>requires_review: true</code></td>
+<td><code>requires_review: false</code></td>
+<td>Approval gate was disabled; investigate authorisation</td>
+</tr>
+</tbody>
+</table>
+<p>Read the complete entry, actor, timestamp, and related operational
+context. A changed value says what was stored before/after; it does not
+explain the person’s intention.</p>
+<h3 id="authentication-and-access-review">Authentication and access
+review</h3>
+<p>For a suspected account incident:</p>
+<ol type="1">
+<li>Filter <strong>Area</strong> to <code>auth</code> and set the date
+range.</li>
+<li>Inspect successful and failed login activity, actors/emails, and IP
+addresses.</li>
+<li>Filter <strong>Area</strong> to <code>access_control</code> for
+role/permission changes around the same time.</li>
+<li>Review <code>user</code> entries for account changes.</li>
+<li>Follow the firm’s incident-response process. Preserve evidence and
+escalate; do not delete the user or related records impulsively.</li>
+</ol>
+<p>An IP address identifies a network endpoint, not necessarily an
+individual. Shared networks, proxies, VPNs, and mobile carriers require
+careful interpretation.</p>
+<h3 id="audit-log-limitations-and-safe-handling">Audit Log limitations
+and safe handling</h3>
+<ul>
+<li>“System” means no user was associated with that entry; it does not
+automatically mean a scheduled task.</li>
+<li>The trail covers configured model and event activity, not every
+mouse click or document view.</li>
+<li>Audit data may contain personal, security, and changed-value
+information. Restrict access and exports/screenshots.</li>
+<li>Times use the application’s displayed/server convention; account for
+timezone when comparing external evidence.</li>
+<li>Retention depends on system configuration and operational
+maintenance.</li>
+<li>If an expected entry is missing, do not conclude the action did not
+occur. Escalate with the affected record, approximate time, user, and
+expected action.</li>
+<li>Never share audit details through an unapproved channel.</li>
+</ul>
+<h2 id="system-settings-super-administrator">13. System Settings (super
+administrator)</h2>
+<p>Select <strong>System Settings</strong>, change one or more tabs,
+then select <strong>Save</strong>. Appearance changes normally require a
+refresh.</p>
+<h3 id="general">General</h3>
+<ul>
+<li><strong>Application Name</strong> — header/login brand name.</li>
+<li><strong>Tagline</strong> — login-page supporting text.</li>
+</ul>
+<h3 id="appearance">Appearance</h3>
+<ul>
+<li>Color themes: Indigo, Amber Gold, Emerald, Rose, Violet, Sky Blue,
+Teal, Orange, Slate, Gray, Blue, Cyan, Purple, Pink.</li>
+<li>Panel modes: Light, Dark, System, High Contrast, Sepia,
+Midnight.</li>
+<li>Branding: Application Logo, App Icon/Favicon, and alternative
+Favicon. The alternative Favicon overrides the App Icon for browser
+tabs.</li>
+</ul>
+<h3 id="document-defaults">Document Defaults</h3>
+<ul>
+<li>Set generated DOCX font family and size (8–24 pt).</li>
+<li><strong>Generate documents in the background</strong> must be
+enabled only when a continuously supervised queue worker is operating.
+Otherwise requests remain Pending indefinitely.</li>
+</ul>
+<h3 id="security">Security</h3>
+<ul>
+<li><strong>Allow two-factor authentication</strong> is the firm-wide
+master switch. Individual users enroll through Profile.</li>
+</ul>
+<h3 id="email">Email</h3>
+<ul>
+<li>Configure From Name, From Address, and optional Staff Notification
+Email for generation-failure alerts.</li>
+<li>Enter SMTP Host, Port, Username, Password, and TLS/SSL only for an
+approved mail provider. A blank host keeps the default
+non-delivery/log-style configuration.</li>
+</ul>
+<h2 id="troubleshooting">14. Troubleshooting</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Symptom</th>
+<th>Likely cause</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>A precedent is absent from the wizard</td>
+<td>Inactive, invalid, deleted, category-restricted, or not
+permitted</td>
+<td>Ask a precedent administrator to verify Active status, validation,
+category, and your role.</td>
+</tr>
+<tr class="even">
+<td>Client data did not prefill</td>
+<td>No client selected or no client-field mapping on that precedent</td>
+<td>Select both client and precedent; enter manually or ask an operator
+to configure mapping.</td>
+</tr>
+<tr class="odd">
+<td>Contact import is absent</td>
+<td>No selected client, no saved contacts, or no party group</td>
+<td>Save contacts against the client and reopen/reselect as needed.</td>
+</tr>
+<tr class="even">
+<td>Beneficiaries will not submit</td>
+<td>Share field does not total exactly 100</td>
+<td>Correct every row, including blank/decimal values, to total
+100.</td>
+</tr>
+<tr class="odd">
+<td>Request remains Pending</td>
+<td>Background processing enabled without a working queue worker</td>
+<td>Do not create duplicates; notify the administrator.</td>
+</tr>
+<tr class="even">
+<td>Status is Failed</td>
+<td>Template marker, placeholder, file, or generation problem</td>
+<td>Open View, copy the Error message, notify an operator, then
+Regenerate after correction.</td>
+</tr>
+<tr class="odd">
+<td>Download buttons are missing</td>
+<td>Not Completed, approval still required, insufficient permission; PDF
+converter may be unavailable</td>
+<td>Check Status and Approval; request approval. Use DOCX if only PDF is
+unavailable.</td>
+</tr>
+<tr class="even">
+<td>Cannot add a witness</td>
+<td>Witness name matches a recorded document party</td>
+<td>Confirm independence and spelling; do not bypass the control without
+legal review.</td>
+</tr>
+<tr class="odd">
+<td>Branding image does not appear</td>
+<td>Public storage link/configuration issue</td>
+<td>Administrator should verify storage publication; do not repeatedly
+upload duplicates.</td>
+</tr>
+<tr class="even">
+<td>2FA code fails</td>
+<td>Device time drift, wrong account, expired code, or used recovery
+code</td>
+<td>Wait for a fresh code, check automatic time, or use one unused
+recovery code.</td>
+</tr>
+</tbody>
+</table>
+<p>When escalating, provide the case reference, request ID/URL, status,
+exact error text, approximate time, and the action attempted. Do not
+email client data or documents through unapproved channels.</p>
+<h2 id="data-and-audit-notes">15. Data and audit notes</h2>
+<p>LawDocs stores staff accounts and roles; client
+identity/contact/address/notes; reusable client contacts; precedents and
+private DOCX templates; questionnaire and party-group configuration;
+requests, answer snapshots and party rows; generated DOCX paths;
+approvals; signature timestamps; witnesses; optional signed-document
+files; per-user File Manager folders/files and metadata; and read-only
+audit activity with actors, subjects, changed values, and selected
+request properties such as IP addresses. Templates, generated documents,
+executed copies, and File Manager content use private application
+storage; avatars and branding use public storage.</p>
+<p>The current repository database inspected for this manual contains
+one administrator account and no migrated client, precedent, or
+document-request tables. The repository also includes an optional,
+non-default demo seeder with three sample clients, three starter
+precedents, example users, and example request states. Demo
+credentials/data must never be deployed as production credentials or
+treated as real legal precedents.</p>
+<p>Follow the firm’s retention, access-control, privacy, backup, and
+breach-response policies. Use least-privilege roles, keep 2FA enabled,
+avoid unnecessary personal data in Notes, and never treat deleting a UI
+record as proof that all backups or historical files have been
+erased.</p>
+<h2 id="daily-operating-checklist">16. Daily operating checklist</h2>
+<h3 id="requesting-staff">Requesting staff</h3>
+<ol type="1">
+<li>Confirm client identity, jurisdiction, document type, and
+instructions.</li>
+<li>Update the Client and Contacts records.</li>
+<li>Create the request; review every prefilled value.</li>
+<li>Complete required fields and party rows; verify
+shares/order/substitutions.</li>
+<li>Add a case reference and submit once.</li>
+<li>Monitor status and resolve failures without duplicating
+requests.</li>
+<li>Review the generated draft and obtain approval where required.</li>
+<li>Download through LawDocs and follow controlled signing
+procedures.</li>
+<li>Record sent/signed timestamps, witnesses, and executed copy.</li>
+</ol>
+<h3 id="reviewing-staff">Reviewing staff</h3>
+<ol type="1">
+<li>Work from <strong>Awaiting Review</strong>.</li>
+<li>Compare submitted answers, precedent/jurisdiction, party details,
+and output.</li>
+<li>Correct through Regenerate; do not silently edit away an audit
+trail.</li>
+<li>Approve only after the firm’s complete review procedure.</li>
+</ol>
+<h3 id="administrators">Administrators</h3>
+<ol type="1">
+<li>Review failed and long-pending requests.</li>
+<li>Maintain least-privilege users and category restrictions.</li>
+<li>Validate and test precedent changes before activation.</li>
+<li>Monitor queue, office/PDF conversion, email, private storage,
+backups, and access logs according to deployment policy.</li>
+</ol>
+<hr />
+<p><strong>Document control:</strong> This manual describes the
+application code and bundled data as inspected on 11 August 2026. Screen
+labels may change after future releases or local configuration. Firm
+procedure and current legal advice take precedence over this operational
+guide.</p>
+</body>
+</html>

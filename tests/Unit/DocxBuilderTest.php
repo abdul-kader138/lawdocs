@@ -8,6 +8,7 @@ use PhpOffice\PhpWord\Element\ListItemRun;
 use PhpOffice\PhpWord\Element\PageBreak;
 use PhpOffice\PhpWord\Element\Title;
 use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\Style;
 use Tests\TestCase;
 
 class DocxBuilderTest extends TestCase
@@ -57,5 +58,41 @@ class DocxBuilderTest extends TestCase
         } finally {
             @unlink($path);
         }
+    }
+
+    public function test_formatting_overrides_apply_custom_font(): void
+    {
+        $phpWord = app(DocxBuilder::class)->build('Title', [], [
+            'font_family' => 'Arial',
+            'font_size' => 14,
+        ]);
+
+        $this->assertSame('Arial', $phpWord->getDefaultFontName());
+        $this->assertEquals(14, $phpWord->getDefaultFontSize());
+    }
+
+    /**
+     * Regression test: DocxBuilder must read formatting overrides with ??,
+     * never ?:/empty() — heading_bold=false and heading_size_step=0 are both
+     * meaningful, falsy override values that those operators would silently
+     * discard back to the global default (bold=true, step=2).
+     */
+    public function test_falsy_heading_overrides_actually_take_effect(): void
+    {
+        app(DocxBuilder::class)->build('Title', [
+            ['type' => 'heading', 'level' => 2, 'text' => 'Section'],
+        ], [
+            'font_size' => 14,
+            'heading_bold' => false,
+            'heading_size_step' => 0,
+        ]);
+
+        $headingStyle = Style::getStyle('Heading_2');
+
+        $this->assertNotNull($headingStyle);
+        $this->assertFalse($headingStyle->isBold());
+        // step=0 => every heading level renders at the plain font size, not
+        // stepped up per level.
+        $this->assertEquals(14, $headingStyle->getSize());
     }
 }

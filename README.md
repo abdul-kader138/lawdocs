@@ -7,6 +7,53 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Publishing this project to GitHub
+
+This project is already a Git repository. Before publishing it, check that no
+passwords, API keys, client documents, or other confidential data are included.
+The `.env` file is ignored and must not be committed. For a legal-document
+application, creating a **private** GitHub repository is recommended.
+
+1. Sign in to [GitHub](https://github.com) and select **New repository**.
+2. Enter a repository name, such as `lawdocs`, and choose **Private** or
+   **Public**.
+3. Leave **Add a README**, **Add .gitignore**, and **Choose a license** disabled,
+   because this local project already contains Git files.
+4. Create the repository, then copy its HTTPS URL.
+5. From this project's directory, run the following commands, replacing the URL
+   with the one GitHub provides:
+
+```bash
+git status
+git add .
+git commit -m "Publish LawDocs project"
+git branch -M main
+git remote add origin https://github.com/YOUR-USERNAME/lawdocs.git
+git push -u origin main
+```
+
+If Git reports that `origin` already exists, update it instead:
+
+```bash
+git remote set-url origin https://github.com/YOUR-USERNAME/lawdocs.git
+git push -u origin main
+```
+
+GitHub may ask you to authenticate in a browser or use a personal access token;
+your normal GitHub password cannot be used as an HTTPS Git password.
+
+For later updates, use:
+
+```bash
+git add .
+git commit -m "Describe the changes"
+git push
+```
+
+Do not commit `.env`. Other developers should create it locally from
+`.env.example`, then install and configure the application in their own
+environment.
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
