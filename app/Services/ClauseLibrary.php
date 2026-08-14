@@ -20,8 +20,10 @@ use Illuminate\Support\Facades\Storage;
 class ClauseLibrary
 {
     /**
-     * @var array<int, array<string, array<int, ClauseElement|ClauseBlockNode>>>
-     *                                                                           in-memory only, keyed by Precedent::id
+     * @var array<string, array<string, array<int, ClauseElement|ClauseBlockNode>>>
+     * In-memory only. The file path and model version are included so a
+     * long-running queue worker cannot serve parsed clauses from a replaced
+     * template (and recreated database IDs cannot collide).
      */
     private array $cache = [];
 
@@ -84,7 +86,14 @@ class ClauseLibrary
      */
     public function allFor(Precedent $precedent): array
     {
-        return $this->cache[$precedent->id] ??= $this->parseOrFail($precedent);
+        $key = implode('|', [
+            $precedent->getConnectionName() ?: config('database.default'),
+            $precedent->getKey(),
+            $precedent->docx_path,
+            $precedent->updated_at?->format('U.u') ?? 'unsaved',
+        ]);
+
+        return $this->cache[$key] ??= $this->parseOrFail($precedent);
     }
 
     private function parseOrFail(Precedent $precedent): array

@@ -11,6 +11,8 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class EditPrecedent extends EditRecord
 {
@@ -19,6 +21,49 @@ class EditPrecedent extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('downloadTemplate')
+                ->label('Download Template')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->action(fn (Precedent $record) => Storage::disk('local')->download(
+                    $record->docx_path,
+                    $record->docx_original_filename ?: Str::slug($record->title).'.docx',
+                )),
+
+            Actions\Action::make('duplicate')
+                ->label('Duplicate')
+                ->icon('heroicon-o-document-duplicate')
+                ->color('gray')
+                ->requiresConfirmation()
+                ->modalDescription('Creates an inactive copy with its own template file and all questionnaire, party, structure, mapping and formatting settings.')
+                ->action(function (Precedent $record) {
+                    $extension = pathinfo($record->docx_path, PATHINFO_EXTENSION) ?: 'docx';
+                    $copyPath = 'precedents/'.Str::uuid().'.'.$extension;
+
+                    if (! Storage::disk('local')->copy($record->docx_path, $copyPath)) {
+                        throw new \RuntimeException('The precedent template could not be copied.');
+                    }
+
+                    try {
+                        $copy = $record->replicate();
+                        $copy->title = $record->title.' (Copy)';
+                        $copy->docx_path = $copyPath;
+                        $copy->is_active = false;
+                        $copy->created_by = auth()->id();
+                        $copy->save();
+                    } catch (\Throwable $e) {
+                        Storage::disk('local')->delete($copyPath);
+                        throw $e;
+                    }
+
+                    Notification::make()
+                        ->success()
+                        ->title('Precedent duplicated as an inactive draft')
+                        ->send();
+
+                    return redirect(PrecedentResource::getUrl('edit', ['record' => $copy]));
+                }),
+
             Actions\Action::make('importFieldsCsv')
                 ->label('Import Fields from CSV')
                 ->icon('heroicon-o-arrow-up-tray')

@@ -11,11 +11,9 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 /**
- * Walkthrough data for the Operations Manual — NOT part of the default
- * `db:seed` pipeline (DatabaseSeeder only calls ShieldSeeder). Run explicitly
- * with `php artisan db:seed --class=DemoDataSeeder` on a local/dev database
- * to populate every screen the manual describes with real, generated
- * documents rather than empty tables. Idempotent: safe to re-run.
+ * Walkthrough data for the Operations Manual. This is part of the default
+ * `db:seed` pipeline so a fresh deployment has the same useful starter data
+ * as the local environment. Idempotent: safe to re-run.
  */
 class DemoDataSeeder extends Seeder
 {

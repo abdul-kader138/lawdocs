@@ -13,6 +13,7 @@ class GeneratorRegistry
 {
     /** @var array<string, class-string<DocumentGenerator>> */
     private const MAP = [
+        'template' => TemplateGenerator::class,
         'will' => WillGenerator::class,
         'power_of_attorney' => PowerOfAttorneyGenerator::class,
         'enduring_guardianship' => EnduringGuardianshipGenerator::class,

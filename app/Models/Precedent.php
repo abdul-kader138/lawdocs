@@ -31,7 +31,7 @@ class Precedent extends Model
     }
 
     protected $fillable = [
-        'title', 'category', 'description', 'docx_path', 'docx_original_filename',
+        'title', 'output_title_template', 'category', 'description', 'docx_path', 'docx_original_filename',
         'extracted_text', 'clause_marker_error', 'questionnaire_fields', 'party_groups',
         'clause_sequence', 'formatting', 'generator_class', 'is_active', 'created_by',
         'jurisdiction', 'requires_review', 'client_field_map',
@@ -112,15 +112,37 @@ class Precedent extends Model
 
         $validator = app(ClauseMarkerValidator::class);
 
+        $availableFlags = $generator->availableFlags();
+        $availableGroups = $generator->availableGroups();
+
+        // The generic template generator derives its contract from this
+        // precedent itself rather than hardcoded PHP: boolean questionnaire
+        // fields become top-level flags and every configured party group is
+        // available to [[REPEAT]].
+        if ($precedent->generator_class === 'template') {
+            $availableFlags = collect($precedent->questionnaire_fields ?? [])
+                ->filter(fn ($field) => ($field['type'] ?? null) === 'boolean' && filled($field['name'] ?? null))
+                ->mapWithKeys(fn ($field) => [$field['name'] => $field['label'] ?? $field['name']])
+                ->all();
+            $availableGroups = collect($precedent->party_groups ?? [])
+                ->filter(fn ($group) => filled($group['key'] ?? null))
+                ->mapWithKeys(fn ($group) => [$group['key'] => $group['label'] ?? $group['key']])
+                ->all();
+        }
+
         $issues = $validator->validate(
             $tree,
             $answerFieldNames,
             $partyGroupFieldsByKey,
-            $generator->availableFlags(),
-            $generator->availableGroups(),
+            $availableFlags,
+            $availableGroups,
         );
 
-        $issues = [...$issues, ...static::validateClauseSequence($precedent, $tree, $generator, $validator)];
+        $issues = [...$issues, ...static::validateClauseSequence($precedent, $tree, $generator, $validator, $availableFlags)];
+
+        if ($precedent->generator_class === 'template' && $precedent->clauseSequenceConfig() === [] && $tree === []) {
+            $issues[] = 'The no-code template generator requires at least one [[CLAUSE:...]] block.';
+        }
 
         return $issues === [] ? null : implode("\n", $issues);
     }
@@ -137,7 +159,7 @@ class Precedent extends Model
      * @param  array<string, array<int, mixed>>  $tree
      * @return array<int, string>
      */
-    private static function validateClauseSequence(self $precedent, array $tree, DeclaresPartyFlags $generator, ClauseMarkerValidator $validator): array
+    private static function validateClauseSequence(self $precedent, array $tree, DeclaresPartyFlags $generator, ClauseMarkerValidator $validator, ?array $availableFlags = null): array
     {
         $entries = $precedent->clauseSequenceConfig();
         if ($entries === []) {
@@ -170,7 +192,7 @@ class Precedent extends Model
             }
         }
 
-        return [...$issues, ...$validator->validateConditions($conditions, $generator->availableFlags())];
+        return [...$issues, ...$validator->validateConditions($conditions, $availableFlags ?? $generator->availableFlags())];
     }
 
     public function documentRequests(): HasMany

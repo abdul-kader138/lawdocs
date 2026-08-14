@@ -5,17 +5,94 @@ namespace App\Filament\Resources\DocumentRequestResource\Pages;
 use App\Filament\Resources\DocumentRequestResource;
 use App\Jobs\GenerateDocumentJob;
 use App\Models\DocumentRequest;
-use App\Models\DocumentRequestParty;
 use App\Models\Precedent;
 use App\Models\Setting;
-use App\Support\PartyGroupFormBuilder;
+use App\Services\DocumentPreviewBuilder;
+use App\Services\DocumentRequestPartyPersister;
+use App\Services\DocxToPdfConverter;
+use Filament\Actions;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Str;
+use PhpOffice\PhpWord\IOFactory;
 
 class CreateDocumentRequest extends CreateRecord
 {
     protected static string $resource = DocumentRequestResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('previewDocx')
+                ->label('Preview Document (.docx)')
+                ->icon('heroicon-o-eye')
+                ->color('gray')
+                ->action(fn () => $this->preview(pdf: false)),
+
+            Actions\Action::make('previewPdf')
+                ->label('Preview Document (PDF)')
+                ->icon('heroicon-o-document-magnifying-glass')
+                ->color('gray')
+                ->visible(fn () => app(DocxToPdfConverter::class)->isAvailable())
+                ->action(fn () => $this->preview(pdf: true)),
+        ];
+    }
+
+    /**
+     * Renders the wizard's CURRENT (possibly partial, unsubmitted) state via
+     * DocumentPreviewBuilder — no DocumentRequest/DocumentRequestParty row
+     * survives this, win or lose. getRawState() (not getState()) is
+     * deliberate: it skips validation, so staff can preview a form that
+     * isn't complete enough to submit yet — that's the point of "see it as
+     * you go." Any resulting generator exception (e.g. a null answer a
+     * generator doesn't null-guard) is caught here and shown as a graceful
+     * notification rather than a 500 — no generator changes are in scope for
+     * this feature.
+     */
+    private function preview(bool $pdf): mixed
+    {
+        Gate::authorize('create', DocumentRequest::class);
+
+        try {
+            $result = app(DocumentPreviewBuilder::class)->build($this->form->getRawState());
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->danger()
+                ->title('Preview failed')
+                ->body($e->getMessage())
+                ->send();
+
+            return null;
+        }
+
+        $tmpDir = storage_path('app/document-previews/'.Str::uuid());
+        File::ensureDirectoryExists($tmpDir);
+        $docxPath = $tmpDir.'/preview.docx';
+        IOFactory::createWriter($result['phpWord'], 'Word2007')->save($docxPath);
+
+        if (! $pdf) {
+            app()->terminating(fn () => File::deleteDirectory($tmpDir));
+
+            return response()->download($docxPath, Str::slug($result['title']).'.docx');
+        }
+
+        $converter = app(DocxToPdfConverter::class);
+        $pdfPath = $converter->convert($docxPath);
+        $workDir = dirname($pdfPath);
+
+        app()->terminating(function () use ($tmpDir, $workDir) {
+            File::deleteDirectory($tmpDir);
+            File::deleteDirectory($workDir);
+        });
+
+        return response()->file($pdfPath, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.Str::slug($result['title']).'.pdf"',
+        ]);
+    }
 
     public function mount(): void
     {
@@ -57,7 +134,7 @@ class CreateDocumentRequest extends CreateRecord
             'status' => 'pending',
         ]);
 
-        $this->persistParties($documentRequest, $precedent, $data['parties'] ?? []);
+        app(DocumentRequestPartyPersister::class)->persist($documentRequest, $precedent, $data['parties'] ?? []);
 
         // Synchronous by default (dispatchSync) — see GenerateDocumentJob's
         // docblock. Async is opt-in via System Settings > Document Defaults,
@@ -95,60 +172,6 @@ class CreateDocumentRequest extends CreateRecord
         }
 
         return $documentRequest;
-    }
-
-    /**
-     * Two passes per group: first insert every row (so each gets a real id),
-     * THEN resolve any "_substitute_ref" selection into a real
-     * substitute_party_id by matching it against the sibling rows' own
-     * primary field text (see PartyGroupFormBuilder::substituteRefField()
-     * for why matching-by-text, not by a UUID, is the mechanism that
-     * actually survives Filament's Repeater dehydration). The UI-only
-     * "_substitute_ref" key is stripped from $row before it's stored — it
-     * must never leak into the persisted data (it isn't a real party field,
-     * and would otherwise show up as an "unknown field" the next time a
-     * marker author cross-checks {{...}} placeholders against
-     * party_groups[].fields).
-     *
-     * @param  array<string, array<int, array<string, mixed>>>  $partiesByGroup
-     */
-    private function persistParties(DocumentRequest $documentRequest, Precedent $precedent, array $partiesByGroup): void
-    {
-        $groupsByKey = collect($precedent->partyGroupsConfig())->keyBy('key');
-
-        foreach ($partiesByGroup as $groupKey => $rows) {
-            $primaryField = $groupsByKey[$groupKey]['fields'][0]['name'] ?? null;
-
-            $partyIdByPrimaryValue = [];
-            $pendingSubstitutes = []; // partyId => substitute's primary-field text
-            $position = 0;
-
-            foreach (array_values($rows) as $row) {
-                $substituteRef = $row[PartyGroupFormBuilder::SUBSTITUTE_REF_FIELD] ?? null;
-                unset($row[PartyGroupFormBuilder::SUBSTITUTE_REF_FIELD]);
-
-                $party = $documentRequest->parties()->create([
-                    'group_key' => $groupKey,
-                    'position' => $position++,
-                    'data' => $row,
-                ]);
-
-                if ($primaryField && filled($row[$primaryField] ?? null)) {
-                    $partyIdByPrimaryValue[$row[$primaryField]] = $party->id;
-                }
-
-                if (filled($substituteRef)) {
-                    $pendingSubstitutes[$party->id] = $substituteRef;
-                }
-            }
-
-            foreach ($pendingSubstitutes as $partyId => $substituteValue) {
-                $substituteId = $partyIdByPrimaryValue[$substituteValue] ?? null;
-                if ($substituteId !== null && $substituteId !== $partyId) {
-                    DocumentRequestParty::whereKey($partyId)->update(['substitute_party_id' => $substituteId]);
-                }
-            }
-        }
     }
 
     protected function getRedirectUrl(): string

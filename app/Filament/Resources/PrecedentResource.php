@@ -59,6 +59,12 @@ class PrecedentResource extends Resource
                                 ->required()
                                 ->maxLength(255),
 
+                            TextInput::make('output_title_template')
+                                ->label('Generated document title')
+                                ->maxLength(255)
+                                ->placeholder('Defaults to the precedent title')
+                                ->helperText('Optional dynamic title, e.g. "Costs Agreement — {{answers.client_name}}". This controls the Word heading and downloaded filename.'),
+
                             Select::make('category')
                                 ->label('Category')
                                 ->options(fn () => static::categoryOptionsForCurrentUser())
@@ -78,7 +84,7 @@ class PrecedentResource extends Resource
                             ->options(fn () => GeneratorRegistry::options())
                             ->required()
                             ->native(false)
-                            ->helperText('Which code generates this document type. Contact a developer to add a new one.'),
+                            ->helperText('Choose “Template” for a no-code document built entirely from the uploaded clauses. Specialist generators remain available for computed legal wording.'),
 
                         Textarea::make('description')
                             ->label('Description')
@@ -120,14 +126,28 @@ class PrecedentResource extends Resource
                                         return 'This generator has no [[IF]]/[[REPEAT]] markers — only verbatim [[CLAUSE:...]] tags.';
                                     }
 
-                                    $flags = collect($generator->availableFlags())
+                                    $availableFlags = $generator->availableFlags();
+                                    $availableGroups = $generator->availableGroups();
+
+                                    if ($generatorKey === 'template') {
+                                        $availableFlags = collect($get('questionnaire_fields') ?? [])
+                                            ->filter(fn ($field) => ($field['type'] ?? null) === 'boolean' && filled($field['name'] ?? null))
+                                            ->mapWithKeys(fn ($field) => [$field['name'] => $field['label'] ?? $field['name']])
+                                            ->all();
+                                        $availableGroups = collect($get('party_groups') ?? [])
+                                            ->filter(fn ($group) => filled($group['key'] ?? null))
+                                            ->mapWithKeys(fn ($group) => [$group['key'] => $group['label'] ?? $group['key']])
+                                            ->all();
+                                    }
+
+                                    $flags = collect($availableFlags)
                                         ->map(fn ($desc, $key) => "• {$key} — {$desc}")
                                         ->implode("\n");
-                                    $groups = collect($generator->availableGroups())
+                                    $groups = collect($availableGroups)
                                         ->map(fn ($desc, $key) => "• {$key} — {$desc}")
                                         ->implode("\n");
 
-                                    $text = "Flags (for [[IF:...]] and Structure conditions):\n".($flags ?: '(none)')
+                                    $text = "Flags (for [[IF:...]] and Structure conditions):\n".($flags ?: ($generatorKey === 'template' ? '(add a Yes / No questionnaire field)' : '(none)'))
                                         ."\n\nParty groups (for [[REPEAT:...]]):\n".($groups ?: '(none)')
                                         ."\n\nOptional: tag a [[CLAUSE:front_matter]] block to replace this generator's "
                                         .'built-in opening paragraph(s) with your own admin-editable wording — omit it '
@@ -153,7 +173,7 @@ class PrecedentResource extends Resource
                                 ->acceptedFileTypes(['application/vnd.openxmlformats-officedocument.wordprocessingml.document'])
                                 ->storeFileNamesIn('docx_original_filename')
                                 ->required()
-                                ->helperText('Only .docx files are accepted.'),
+                                ->helperText('Only .docx files are accepted. Uploading a replacement updates future generations; existing generated documents remain unchanged.'),
 
                             Textarea::make('clause_marker_error')
                                 ->label('Clause Marker Check')
