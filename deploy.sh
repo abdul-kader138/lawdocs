@@ -36,10 +36,24 @@ git fetch origin "$BRANCH"
 git checkout "$BRANCH"
 git merge --ff-only "origin/$BRANCH"
 
+if [[ -f package-lock.json ]]; then
+    if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+        echo "Error: Node.js and npm are required to build frontend assets." >&2
+        echo "Install Node.js 22 LTS on this server, then run ./deploy.sh again." >&2
+        exit 1
+    fi
+
+    if ! node -e 'const [major, minor] = process.versions.node.split(".").map(Number); process.exit(major > 22 || major === 22 && minor >= 12 || major === 20 && minor >= 19 ? 0 : 1)'; then
+        echo "Error: Node.js 20.19+ or 22.12+ is required (found $(node --version))." >&2
+        echo "Install Node.js 22 LTS on this server, then run ./deploy.sh again." >&2
+        exit 1
+    fi
+fi
+
 "$PHP_BIN" artisan down --retry=60
 maintenance_enabled=true
 
-"$COMPOSER_BIN" install \
+COMPOSER_ALLOW_SUPERUSER=1 "$COMPOSER_BIN" install \
     --no-dev \
     --no-interaction \
     --prefer-dist \
