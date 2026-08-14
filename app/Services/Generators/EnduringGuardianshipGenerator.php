@@ -5,8 +5,9 @@ namespace App\Services\Generators;
 use App\Contracts\DeclaresPartyFlags;
 use App\Contracts\DocumentGenerator;
 use App\Models\DocumentRequest;
-use App\Services\ClauseLibrary;
+use App\Services\AnswerContextBuilder;
 use App\Services\Clause\ClauseSequenceRenderer;
+use App\Services\ClauseLibrary;
 use App\Services\PartyGroupAssembler;
 
 /**
@@ -40,18 +41,18 @@ class EnduringGuardianshipGenerator implements DeclaresPartyFlags, DocumentGener
         private readonly ClauseSequenceRenderer $sequence,
         private readonly PartyGroupAssembler $parties,
         private readonly ClauseLibrary $clauses,
+        private readonly AnswerContextBuilder $answerContext,
     ) {}
 
     public function generate(DocumentRequest $documentRequest): array
     {
         $precedent = $documentRequest->precedent;
         $answers = $documentRequest->answers ?? [];
+        $built = $this->answerContext->build($answers, array_keys($precedent->questionnaireFieldsConfig()));
 
         $context = [
-            'answers' => $answers,
-            'flags' => [
-                'guardians_act_jointly' => (bool) ($answers['guardians_act_jointly'] ?? false),
-            ],
+            'answers' => $built['answers'],
+            'flags' => $built['flags'],
             'items' => $this->parties->forRequest($documentRequest),
         ];
 

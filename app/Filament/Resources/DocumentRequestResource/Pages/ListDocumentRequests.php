@@ -18,6 +18,8 @@ use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Resources\Components\Tab;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
@@ -32,31 +34,34 @@ class ListDocumentRequests extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\Action::make('downloadBatchCsvTemplate')
-                ->label('Download Batch CSV Template')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('gray')
-                ->authorize('create', DocumentRequest::class)
-                ->form([
-                    Select::make('precedent_id')
-                        ->label('Precedent')
-                        ->options(fn () => Precedent::query()->where('is_active', true)->pluck('title', 'id'))
-                        ->required()
-                        ->native(false),
-                ])
-                ->action(function (array $data) {
-                    Gate::authorize('create', DocumentRequest::class);
+            Actions\CreateAction::make()->label('New Document Request')->icon('heroicon-o-plus'),
 
-                    $precedent = Precedent::findOrFail($data['precedent_id']);
-                    $header = BatchCsvRowValidator::buildTemplateHeader($precedent);
-                    $csv = implode(',', $header)."\n";
+            Actions\ActionGroup::make([
+                Actions\Action::make('downloadBatchCsvTemplate')
+                    ->label('Download Batch CSV Template')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->authorize('create', DocumentRequest::class)
+                    ->form([
+                        Select::make('precedent_id')
+                            ->label('Precedent')
+                            ->options(fn () => Precedent::query()->where('is_active', true)->pluck('title', 'id'))
+                            ->required()
+                            ->native(false),
+                    ])
+                    ->action(function (array $data) {
+                        Gate::authorize('create', DocumentRequest::class);
 
-                    return Response::streamDownload(
-                        fn () => print ($csv),
-                        Str::slug($precedent->title).'-batch-template.csv',
-                        ['Content-Type' => 'text/csv'],
-                    );
-                }),
+                        $precedent = Precedent::findOrFail($data['precedent_id']);
+                        $header = BatchCsvRowValidator::buildTemplateHeader($precedent);
+                        $csv = implode(',', $header)."\n";
+
+                        return Response::streamDownload(
+                            fn () => print ($csv),
+                            Str::slug($precedent->title).'-batch-template.csv',
+                            ['Content-Type' => 'text/csv'],
+                        );
+                    }),
 
             Actions\Action::make('batchGenerateCsv')
                 ->label('Batch Generate from CSV')
@@ -167,7 +172,31 @@ class ListDocumentRequests extends ListRecords
                         ->send();
                 }),
 
-            Actions\CreateAction::make(),
+            ])->label('Batch tools')->icon('heroicon-o-table-cells')->color('gray')->button(),
+        ];
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make('All')->badge(DocumentRequest::count()),
+            'mine' => Tab::make('My Requests')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('requested_by', auth()->id()))
+                ->badge(DocumentRequest::where('requested_by', auth()->id())->count()),
+            'in_progress' => Tab::make('In Progress')
+                ->modifyQueryUsing(fn (Builder $query) => $query->whereIn('status', ['pending', 'processing']))
+                ->badge(DocumentRequest::whereIn('status', ['pending', 'processing'])->count())
+                ->badgeColor('warning'),
+            'needs_review' => Tab::make('Needs Review')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'completed')->whereNull('approved_at')
+                    ->whereHas('precedent', fn (Builder $query) => $query->where('requires_review', true)))
+                ->badge(DocumentRequest::where('status', 'completed')->whereNull('approved_at')
+                    ->whereHas('precedent', fn (Builder $query) => $query->where('requires_review', true))->count())
+                ->badgeColor('warning'),
+            'failed' => Tab::make('Failed')
+                ->modifyQueryUsing(fn (Builder $query) => $query->where('status', 'failed'))
+                ->badge(DocumentRequest::where('status', 'failed')->count())
+                ->badgeColor('danger'),
         ];
     }
 

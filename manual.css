@@ -22,6 +22,8 @@ th { overflow-wrap: anywhere; word-break: break-word; }
 tr:nth-child(even) td { background: #f8fafc; }
 blockquote { margin: 6mm 0; padding: 5mm; background: #eef2ff; border-left: 4px solid #6366f1; color: #312e81; }
 code { font-family: "DejaVu Sans Mono", monospace; background: #f1f5f9; color: #7c2d12; padding: .2mm .8mm; font-size: 8.7pt; }
+pre { background: #f1f5f9; padding: 3mm; margin: 0 0 4mm; border-radius: 1.5mm; white-space: pre-wrap; overflow-wrap: anywhere; word-break: break-all; break-inside: avoid; }
+pre code { background: none; padding: 0; }
 strong { color: #0f172a; }
 a { color: #4338ca; text-decoration: none; }
 hr { border: 0; border-top: 1px solid #cbd5e1; margin: 8mm 0; }

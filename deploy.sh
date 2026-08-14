@@ -73,6 +73,21 @@ fi
 "$PHP_BIN" artisan optimize
 "$PHP_BIN" artisan queue:restart
 
+# Installs/keeps the persistent queue worker current. queue:restart above
+# only signals an ALREADY-RUNNING worker to gracefully restart between
+# jobs — it starts nothing on its own, so this is what actually makes
+# Setting::async_generation_enabled do anything instead of leaving every
+# queued document stuck at "pending" forever (see the queue-worker unit
+# file's own comment on why an explicit restart, not just queue:restart,
+# is needed to pick up fresh code — same class of issue as php-fpm's
+# opcache holding onto a stale build after a deploy).
+if [[ -f deploy/lawdocs-queue-worker.service ]] && command -v systemctl >/dev/null 2>&1; then
+    install -m 644 deploy/lawdocs-queue-worker.service /etc/systemd/system/lawdocs-queue-worker.service
+    systemctl daemon-reload
+    systemctl enable lawdocs-queue-worker
+    systemctl restart lawdocs-queue-worker
+fi
+
 if id "$WEB_USER" >/dev/null 2>&1; then
     chown -R "$WEB_USER:$WEB_GROUP" storage bootstrap/cache
     chmod -R ug+rwX storage bootstrap/cache

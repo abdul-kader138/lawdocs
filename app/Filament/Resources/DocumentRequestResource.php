@@ -21,6 +21,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -28,6 +29,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Database\Eloquent\Builder;
 
 class DocumentRequestResource extends Resource
 {
@@ -150,22 +152,29 @@ class DocumentRequestResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('precedent_title_snapshot')
-                    ->label('Precedent')
+                    ->label('Document / Matter')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->weight('semibold')
+                    ->wrap()
+                    ->description(fn (DocumentRequest $record) => $record->case_reference
+                        ? 'Matter: '.$record->case_reference
+                        : 'Request #'.$record->id),
 
                 TextColumn::make('client.name')
                     ->label('Client')
                     ->searchable()
                     ->sortable()
                     ->placeholder('—')
-                    ->toggleable(),
+                    ->toggleable()
+                    ->description(fn (DocumentRequest $record) => $record->client?->email),
 
                 TextColumn::make('requestedBy.name')
                     ->label('Requested By')
                     ->sortable(),
 
                 BadgeColumn::make('status')
+                    ->formatStateUsing(fn (string $state) => str($state)->replace('_', ' ')->title())
                     ->colors([
                         'gray' => 'pending',
                         'warning' => 'processing',
@@ -197,59 +206,105 @@ class DocumentRequestResource extends Resource
                 TextColumn::make('case_reference')
                     ->label('Case Reference')
                     ->searchable()
-                    ->toggleable(),
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 TextColumn::make('created_at')
                     ->label('Requested')
-                    ->dateTime('d M Y H:i')
+                    ->since()
+                    ->dateTimeTooltip('d M Y H:i')
                     ->sortable(),
             ])
             ->filters([
+                SelectFilter::make('status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'processing' => 'Processing',
+                        'completed' => 'Completed',
+                        'failed' => 'Failed',
+                    ])
+                    ->multiple(),
+
+                SelectFilter::make('precedent_id')
+                    ->label('Precedent')
+                    ->relationship('precedent', 'title')
+                    ->searchable()
+                    ->preload(),
+
                 SelectFilter::make('client_id')
                     ->label('Client')
                     ->relationship('client', 'name')
                     ->searchable()
                     ->preload(),
+
+                SelectFilter::make('approval')
+                    ->options([
+                        'needs_review' => 'Needs review',
+                        'approved' => 'Approved',
+                        'not_required' => 'Review not required',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return match ($data['value'] ?? null) {
+                            'needs_review' => $query->where('status', 'completed')->whereNull('approved_at')
+                                ->whereHas('precedent', fn (Builder $query) => $query->where('requires_review', true)),
+                            'approved' => $query->where('status', 'completed')->whereNotNull('approved_at'),
+                            'not_required' => $query->where('status', 'completed')
+                                ->whereHas('precedent', fn (Builder $query) => $query->where('requires_review', false)),
+                            default => $query,
+                        };
+                    }),
             ])
+            ->filtersFormColumns(2)
+            ->persistFiltersInSession()
             ->defaultSort('created_at', 'desc')
             ->actions([
-                Action::make('previewPdf')
-                    ->label('Preview (PDF)')
-                    ->icon('heroicon-o-eye')
+                ActionGroup::make([
+                    ViewAction::make()
+                        ->label('Open request')
+                        ->icon('heroicon-o-arrow-top-right-on-square'),
+
+                    Action::make('previewPdf')
+                        ->label('Preview PDF')
+                        ->icon('heroicon-o-eye')
+                        ->url(fn (DocumentRequest $record) => route('document-requests.preview-pdf', $record))
+                        ->openUrlInNewTab()
+                        ->visible(fn (DocumentRequest $record) => $pdfExportAvailable && $record->status === 'completed'),
+
+                    Action::make('approve')
+                        ->label('Approve for download')
+                        ->icon('heroicon-o-check-badge')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->modalDescription('This confirms the generated draft has been reviewed and may be downloaded. This does not check the wording for you.')
+                        ->action(fn (DocumentRequest $record) => $record->update(['approved_at' => now(), 'approved_by' => auth()->id()]))
+                        ->visible(fn (DocumentRequest $record) => $record->status === 'completed'
+                            && $record->requiresApproval()
+                            && ! $record->isApproved()
+                            && Gate::allows('approve', $record)),
+
+                    Action::make('download')
+                        ->label('Download .docx')
+                        ->icon('heroicon-o-arrow-down-tray')
+                        ->url(fn (DocumentRequest $record) => route('document-requests.download', $record))
+                        ->openUrlInNewTab()
+                        ->visible(fn (DocumentRequest $record) => $record->isReadyForDownload()),
+
+                    Action::make('downloadPdf')
+                        ->label('Download PDF')
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('gray')
+                        ->url(fn (DocumentRequest $record) => route('document-requests.download-pdf', $record))
+                        ->openUrlInNewTab()
+                        ->visible(fn (DocumentRequest $record) => $pdfExportAvailable && $record->isReadyForDownload()),
+                ])
+                    ->label('Actions')
+                    ->icon('heroicon-m-ellipsis-vertical')
                     ->color('gray')
-                    ->url(fn (DocumentRequest $record) => route('document-requests.preview-pdf', $record))
-                    ->openUrlInNewTab()
-                    ->visible(fn (DocumentRequest $record) => $pdfExportAvailable && $record->status === 'completed'),
-
-                Action::make('approve')
-                    ->label('Approve')
-                    ->icon('heroicon-o-check-badge')
-                    ->color('success')
-                    ->requiresConfirmation()
-                    ->modalDescription('This confirms the generated draft has been reviewed and may be downloaded. This does not check the wording for you.')
-                    ->action(fn (DocumentRequest $record) => $record->update(['approved_at' => now(), 'approved_by' => auth()->id()]))
-                    ->visible(fn (DocumentRequest $record) => $record->status === 'completed'
-                        && $record->requiresApproval()
-                        && ! $record->isApproved()
-                        && Gate::allows('approve', $record)),
-
-                Action::make('download')
-                    ->label('Download .docx')
-                    ->icon('heroicon-o-arrow-down-tray')
-                    ->url(fn (DocumentRequest $record) => route('document-requests.download', $record))
-                    ->openUrlInNewTab()
-                    ->visible(fn (DocumentRequest $record) => $record->isReadyForDownload()),
-
-                Action::make('downloadPdf')
-                    ->label('Download PDF')
-                    ->icon('heroicon-o-document-arrow-down')
-                    ->color('gray')
-                    ->url(fn (DocumentRequest $record) => route('document-requests.download-pdf', $record))
-                    ->openUrlInNewTab()
-                    ->visible(fn (DocumentRequest $record) => $pdfExportAvailable && $record->isReadyForDownload()),
-
-                ViewAction::make(),
-            ]);
+                    ->dropdownPlacement('bottom-end'),
+            ])
+            ->recordUrl(fn (DocumentRequest $record) => static::getUrl('view', ['record' => $record]))
+            ->striped()
+            ->paginated([10, 25, 50, 100])
+            ->defaultPaginationPageOption(25);
     }
 
     public static function getRelations(): array

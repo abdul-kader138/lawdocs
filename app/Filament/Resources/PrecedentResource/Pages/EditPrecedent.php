@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PrecedentResource\Pages;
 
 use App\Filament\Resources\PrecedentResource;
 use App\Models\Precedent;
+use App\Services\PrecedentQaService;
 use App\Support\FieldCsvRowValidator;
 use Filament\Actions;
 use Filament\Forms\Components\FileUpload;
@@ -21,6 +22,51 @@ class EditPrecedent extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('runQa')
+                ->label('Run QA')->icon('heroicon-o-clipboard-document-check')->color('success')
+                ->action(function (Precedent $record) {
+                    $run = app(PrecedentQaService::class)->run($record, auth()->id());
+                    $issues = collect($run->issues ?? []);
+                    $scenarioResults = collect($run->scenario_results ?? []);
+                    $failedScenarios = $scenarioResults->where('status', '!=', 'passed');
+
+                    $details = $issues
+                        ->map(fn (array $issue) => strtoupper($issue['severity']).': '.$issue['message'])
+                        ->merge($failedScenarios->map(fn (array $result) => 'SCENARIO FAILED: '.$result['name']))
+                        ->take(3);
+
+                    $body = $issues->count().' validation issue(s); '
+                        .$scenarioResults->where('status', 'passed')->count().'/'.$scenarioResults->count().' scenario(s) passed.';
+
+                    if ($details->isNotEmpty()) {
+                        $body .= "\n\n".$details->implode("\n");
+                        if ($issues->count() + $failedScenarios->count() > $details->count()) {
+                            $body .= "\nMore details are available below.";
+                        }
+                        $body .= "\nSelect View issues in Quality Assurance Runs for the full report.";
+                    }
+
+                    $notification = Notification::make()
+                        ->title('QA run '.strtoupper($run->status))
+                        ->body($body)
+                        ->color(match ($run->status) { 'passed' => 'success', 'warning' => 'warning', default => 'danger' });
+
+                    if ($run->status !== 'passed') {
+                        $notification->persistent();
+                    }
+
+                    $notification->send();
+                }),
+
+            Actions\ActionGroup::make([
+            Actions\Action::make('setQaBaseline')
+                ->label('Set QA Baseline')->icon('heroicon-o-bookmark-square')->color('gray')->requiresConfirmation()
+                ->modalDescription('Future QA runs will compare the configuration and source-template checksum against the current state.')
+                ->action(function (Precedent $record) {
+                    app(PrecedentQaService::class)->setBaseline($record, auth()->id());
+                    Notification::make()->success()->title('QA comparison baseline saved')->send();
+                }),
+
             Actions\Action::make('downloadTemplate')
                 ->label('Download Template')
                 ->icon('heroicon-o-arrow-down-tray')
@@ -108,7 +154,7 @@ class EditPrecedent extends EditRecord
                     $this->importPartyGroupFieldsCsv($record, $data['csv']);
                 }),
 
-            Actions\DeleteAction::make(),
+            ])->label('More actions')->icon('heroicon-m-ellipsis-vertical')->color('gray')->button(),
         ];
     }
 

@@ -5,10 +5,14 @@ namespace App\Filament\Resources;
 use App\Contracts\DeclaresComputedBlocks;
 use App\Contracts\DeclaresPartyFlags;
 use App\Filament\Resources\PrecedentResource\Pages;
+use App\Filament\Resources\PrecedentResource\RelationManagers\QaRunsRelationManager;
+use App\Filament\Resources\PrecedentResource\RelationManagers\TestScenariosRelationManager;
 use App\Models\Precedent;
 use App\Models\Setting;
 use App\Services\Generators\GeneratorRegistry;
 use App\Support\AustralianJurisdictions;
+use App\Support\DocumentFormattingProfiles;
+use App\Support\PrecedentFlagResolver;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\KeyValue;
@@ -23,6 +27,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteAction;
@@ -53,7 +58,7 @@ class PrecedentResource extends Resource
                 // ── Details ──────────────────────────────────────────────
                 Tab::make('Details')->icon('heroicon-o-information-circle')->schema([
                     Section::make('Identity')->schema([
-                        Grid::make(2)->schema([
+                        Grid::make(['default' => 1, 'md' => 2])->schema([
                             TextInput::make('title')
                                 ->label('Title')
                                 ->required()
@@ -126,19 +131,14 @@ class PrecedentResource extends Resource
                                         return 'This generator has no [[IF]]/[[REPEAT]] markers — only verbatim [[CLAUSE:...]] tags.';
                                     }
 
-                                    $availableFlags = $generator->availableFlags();
-                                    $availableGroups = $generator->availableGroups();
-
-                                    if ($generatorKey === 'template') {
-                                        $availableFlags = collect($get('questionnaire_fields') ?? [])
-                                            ->filter(fn ($field) => ($field['type'] ?? null) === 'boolean' && filled($field['name'] ?? null))
-                                            ->mapWithKeys(fn ($field) => [$field['name'] => $field['label'] ?? $field['name']])
-                                            ->all();
-                                        $availableGroups = collect($get('party_groups') ?? [])
-                                            ->filter(fn ($group) => filled($group['key'] ?? null))
-                                            ->mapWithKeys(fn ($group) => [$group['key'] => $group['label'] ?? $group['key']])
-                                            ->all();
-                                    }
+                                    // Every questionnaire field (any type) and every configured party
+                                    // group is available here, for every generator — not just the
+                                    // no-code template generator — merged with whatever extra
+                                    // flags/groups the generator itself declares. Must stay in sync
+                                    // with Precedent::validateMarkerReferences(), hence the shared
+                                    // PrecedentFlagResolver rather than a second copy of this logic.
+                                    $availableFlags = PrecedentFlagResolver::availableFlags($get('questionnaire_fields') ?? [], $generator);
+                                    $availableGroups = PrecedentFlagResolver::availableGroups($get('party_groups') ?? [], $generator);
 
                                     $flags = collect($availableFlags)
                                         ->map(fn ($desc, $key) => "• {$key} — {$desc}")
@@ -147,7 +147,7 @@ class PrecedentResource extends Resource
                                         ->map(fn ($desc, $key) => "• {$key} — {$desc}")
                                         ->implode("\n");
 
-                                    $text = "Flags (for [[IF:...]] and Structure conditions):\n".($flags ?: ($generatorKey === 'template' ? '(add a Yes / No questionnaire field)' : '(none)'))
+                                    $text = "Flags (for [[IF:...]] and Structure conditions):\n".($flags ?: '(add a questionnaire field)')
                                         ."\n\nParty groups (for [[REPEAT:...]]):\n".($groups ?: '(none)')
                                         ."\n\nOptional: tag a [[CLAUSE:front_matter]] block to replace this generator's "
                                         .'built-in opening paragraph(s) with your own admin-editable wording — omit it '
@@ -200,7 +200,7 @@ class PrecedentResource extends Resource
                             Repeater::make('clause_sequence')
                                 ->label('')
                                 ->schema([
-                                    Grid::make(4)->schema([
+                                    Grid::make(['default' => 1, 'sm' => 2, 'xl' => 4])->schema([
                                         TextInput::make('heading')
                                             ->label('Section heading')
                                             ->maxLength(150)
@@ -244,14 +244,32 @@ class PrecedentResource extends Resource
 
                 // ── Formatting ───────────────────────────────────────────
                 Tab::make('Formatting')->icon('heroicon-o-paint-brush')->schema([
-                    Section::make('Font & heading style for this precedent')
-                        ->description('Optional. Leave any field blank to use the firm-wide default set in System Settings → Document Defaults. Only affects generator-authored text (headings, front matter, computed blocks) — text captured verbatim from inside a [[CLAUSE:...]] block always keeps its own formatting from the uploaded .docx, unaffected by this tab.')
+                    Section::make('Professional document style')
+                        ->description('Choose a professional starting profile, then adjust individual settings. Font and paragraph controls affect generator-authored text; text inside uploaded clause blocks keeps its original Word formatting. Margins, footer and page numbering apply to the whole generated document.')
                         ->schema([
-                            Grid::make(2)->schema([
-                                TextInput::make('formatting.font_family')
+                            Select::make('formatting.profile')
+                                ->label('Formatting Profile')
+                                ->options(DocumentFormattingProfiles::options())
+                                ->default('legal_traditional')
+                                ->native(false)
+                                ->live()
+                                ->afterStateUpdated(function (?string $state, Set $set): void {
+                                    foreach (DocumentFormattingProfiles::values($state) as $key => $value) {
+                                        $set("formatting.{$key}", $value);
+                                    }
+                                })
+                                ->helperText('Legal Traditional is recommended for wills and agreements. Court Filing uses double spacing and a wider left margin.'),
+
+                            Grid::make(['default' => 1, 'md' => 2])->schema([
+                                Select::make('formatting.font_family')
                                     ->label('Font Family')
+                                    ->options(array_combine(
+                                        ['Times New Roman', 'Arial', 'Calibri', 'Georgia', 'Garamond'],
+                                        ['Times New Roman', 'Arial', 'Calibri', 'Georgia', 'Garamond'],
+                                    ))
                                     ->placeholder(fn () => Setting::get('docx_font_family', 'Times New Roman').' (global default)')
-                                    ->maxLength(100),
+                                    ->searchable()
+                                    ->native(false),
 
                                 TextInput::make('formatting.font_size')
                                     ->label('Font Size (pt)')
@@ -261,7 +279,21 @@ class PrecedentResource extends Resource
                                     ->placeholder(fn () => Setting::get('docx_font_size', 12).' (global default)'),
                             ]),
 
-                            Grid::make(2)->schema([
+                            Grid::make(['default' => 1, 'sm' => 2, 'xl' => 4])->schema([
+                                Select::make('formatting.body_alignment')
+                                    ->label('Body Alignment')
+                                    ->options(['left' => 'Left', 'both' => 'Justified', 'center' => 'Centred'])
+                                    ->native(false),
+
+                                Select::make('formatting.line_spacing')
+                                    ->label('Line Spacing')
+                                    ->options(['1' => 'Single', '1.15' => '1.15', '1.5' => '1.5', '2' => 'Double'])
+                                    ->native(false),
+
+                                TextInput::make('formatting.paragraph_space_after')
+                                    ->label('After Paragraph (pt)')
+                                    ->numeric()->minValue(0)->maxValue(36),
+
                                 Select::make('formatting.heading_bold')
                                     ->label('Heading Weight')
                                     ->options(['1' => 'Bold', '0' => 'Not bold'])
@@ -276,6 +308,35 @@ class PrecedentResource extends Resource
                                     ->placeholder('2 (global default)')
                                     ->helperText('How many points larger each heading level is than the one below it.'),
                             ]),
+
+                            Section::make('Paragraph indentation')->compact()->schema([
+                                Grid::make(['default' => 1, 'md' => 3])->schema([
+                                    TextInput::make('formatting.first_line_indent')->label('First Line (mm)')->numeric()->minValue(0)->maxValue(30),
+                                    TextInput::make('formatting.left_indent')->label('Left Indent (mm)')->numeric()->minValue(0)->maxValue(60),
+                                    TextInput::make('formatting.right_indent')->label('Right Indent (mm)')->numeric()->minValue(0)->maxValue(60),
+                                ]),
+                                Toggle::make('formatting.apply_paragraph_style_to_clauses')
+                                    ->label('Apply paragraph style to uploaded clauses')
+                                    ->helperText('Recommended for uniform output. Applies alignment, line spacing, paragraph spacing and indentation to clause paragraphs and lists, while preserving their bold, italic, font runs and numbering.'),
+                            ]),
+
+                            Section::make('Page layout')->compact()->schema([
+                                Grid::make(['default' => 1, 'sm' => 2, 'xl' => 4])->schema([
+                                    TextInput::make('formatting.margin_top')->label('Top Margin (mm)')->numeric()->minValue(10)->maxValue(60),
+                                    TextInput::make('formatting.margin_right')->label('Right Margin (mm)')->numeric()->minValue(10)->maxValue(60),
+                                    TextInput::make('formatting.margin_bottom')->label('Bottom Margin (mm)')->numeric()->minValue(10)->maxValue(60),
+                                    TextInput::make('formatting.margin_left')->label('Left Margin (mm)')->numeric()->minValue(10)->maxValue(60),
+                                ]),
+                                Grid::make(['default' => 1, 'md' => 2])->schema([
+                                    TextInput::make('formatting.footer_text')
+                                        ->label('Footer Text')
+                                        ->maxLength(200)
+                                        ->placeholder('Optional confidentiality or firm notice'),
+                                    Toggle::make('formatting.page_numbers')
+                                        ->label('Show page numbers')
+                                        ->helperText('Adds “Page X of Y” at the bottom-right.'),
+                                ]),
+                            ]),
                         ]),
                 ]),
 
@@ -287,7 +348,7 @@ class PrecedentResource extends Resource
                             Repeater::make('questionnaire_fields')
                                 ->label('')
                                 ->schema([
-                                    Grid::make(4)->schema([
+                                    Grid::make(['default' => 1, 'sm' => 2, 'xl' => 4])->schema([
                                         TextInput::make('name')
                                             ->label('Field name')
                                             ->required()
@@ -351,7 +412,7 @@ class PrecedentResource extends Resource
                     Section::make('Prefill from a Client record')
                         ->description('Optional. When staff pick an existing Client on the document request wizard, any questionnaire field mapped here is filled in automatically from that Client\'s details — nothing here is required, and staff can still edit every field afterwards. Field names differ per precedent (e.g. "testator_name" on a Will vs "principal_name" on a Power of Attorney) — this mapping is what lets the wizard prefill correctly regardless.')
                         ->schema([
-                            Grid::make(3)->schema(
+                            Grid::make(['default' => 1, 'md' => 3])->schema(
                                 collect([
                                     'name' => "Client's Full Name",
                                     'dob' => 'Date of Birth',
@@ -382,7 +443,7 @@ class PrecedentResource extends Resource
                             Repeater::make('party_groups')
                                 ->label('')
                                 ->schema([
-                                    Grid::make(4)->schema([
+                                    Grid::make(['default' => 1, 'sm' => 2, 'xl' => 4])->schema([
                                         TextInput::make('key')
                                             ->label('Group key')
                                             ->required()
@@ -415,7 +476,7 @@ class PrecedentResource extends Resource
                                             ->default(0),
                                     ]),
 
-                                    Grid::make(4)->schema([
+                                    Grid::make(['default' => 1, 'sm' => 2, 'xl' => 4])->schema([
                                         TextInput::make('max_items')
                                             ->label('Max rows (blank = unlimited)')
                                             ->numeric(),
@@ -436,7 +497,7 @@ class PrecedentResource extends Resource
                                     Repeater::make('fields')
                                         ->label('Fields captured per row')
                                         ->schema([
-                                            Grid::make(4)->schema([
+                                            Grid::make(['default' => 1, 'sm' => 2, 'xl' => 4])->schema([
                                                 TextInput::make('name')
                                                     ->label('Field name')
                                                     ->required()
@@ -547,6 +608,14 @@ class PrecedentResource extends Resource
             'index' => Pages\ListPrecedents::route('/'),
             'create' => Pages\CreatePrecedent::route('/create'),
             'edit' => Pages\EditPrecedent::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            TestScenariosRelationManager::class,
+            QaRunsRelationManager::class,
         ];
     }
 

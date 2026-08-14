@@ -5,17 +5,20 @@ namespace App\Models;
 use App\Contracts\DeclaresComputedBlocks;
 use App\Contracts\DeclaresPartyFlags;
 use App\Exceptions\ClauseMarkerException;
+use App\Services\AnswerContextBuilder;
 use App\Services\Clause\ClauseMarkerParser;
 use App\Services\Clause\ClauseMarkerValidator;
 use App\Services\Generators\GeneratorRegistry;
 use App\Services\PrecedentTextExtractor;
+use App\Support\DocumentFormattingProfiles;
+use App\Support\PrecedentFlagResolver;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class Precedent extends Model
 {
@@ -94,6 +97,8 @@ class Precedent extends Model
         }
 
         $answerFieldNames = collect($precedent->questionnaire_fields ?? [])->pluck('name')->filter()->values()->all();
+        $answerFieldNames = AnswerContextBuilder::derivedAnswerFieldNames($answerFieldNames);
+
         $partyGroupFieldsByKey = collect($precedent->party_groups ?? [])
             ->filter(fn ($g) => filled($g['key'] ?? null))
             ->mapWithKeys(function ($g) {
@@ -112,23 +117,14 @@ class Precedent extends Model
 
         $validator = app(ClauseMarkerValidator::class);
 
-        $availableFlags = $generator->availableFlags();
-        $availableGroups = $generator->availableGroups();
-
-        // The generic template generator derives its contract from this
-        // precedent itself rather than hardcoded PHP: boolean questionnaire
-        // fields become top-level flags and every configured party group is
-        // available to [[REPEAT]].
-        if ($precedent->generator_class === 'template') {
-            $availableFlags = collect($precedent->questionnaire_fields ?? [])
-                ->filter(fn ($field) => ($field['type'] ?? null) === 'boolean' && filled($field['name'] ?? null))
-                ->mapWithKeys(fn ($field) => [$field['name'] => $field['label'] ?? $field['name']])
-                ->all();
-            $availableGroups = collect($precedent->party_groups ?? [])
-                ->filter(fn ($group) => filled($group['key'] ?? null))
-                ->mapWithKeys(fn ($group) => [$group['key'] => $group['label'] ?? $group['key']])
-                ->all();
-        }
+        // Every questionnaire field (any type) is a valid [[IF:...]] target
+        // and every configured party group is REPEAT-available, for every
+        // generator — not just the no-code template generator — merged with
+        // whatever extra flags/groups the generator itself declares (e.g.
+        // WillGenerator's REPEAT-scoped "beneficiary.per_stirpes"). See
+        // PrecedentFlagResolver/AnswerContextBuilder.
+        $availableFlags = PrecedentFlagResolver::availableFlags($precedent->questionnaire_fields ?? [], $generator);
+        $availableGroups = PrecedentFlagResolver::availableGroups($precedent->party_groups ?? [], $generator);
 
         $issues = $validator->validate(
             $tree,
@@ -198,6 +194,21 @@ class Precedent extends Model
     public function documentRequests(): HasMany
     {
         return $this->hasMany(DocumentRequest::class);
+    }
+
+    public function testScenarios(): HasMany
+    {
+        return $this->hasMany(PrecedentTestScenario::class);
+    }
+
+    public function qaRuns(): HasMany
+    {
+        return $this->hasMany(PrecedentQaRun::class);
+    }
+
+    public function qaBaseline(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(PrecedentQaBaseline::class);
     }
 
     /**
@@ -276,17 +287,31 @@ class Precedent extends Model
      * isset()/!== '' normalization (not a naive ??) since a blank Filament
      * TextInput/Select can dehydrate as '' rather than null.
      *
-     * @return array{font_family: ?string, font_size: ?int, heading_bold: ?bool, heading_size_step: ?int}
+     * @return array<string, mixed>
      */
     public function formattingConfig(): array
     {
-        $f = $this->formatting ?? [];
+        $stored = $this->formatting ?? [];
+        $f = [...DocumentFormattingProfiles::values($stored['profile'] ?? null), ...$stored];
 
         return [
             'font_family' => isset($f['font_family']) && $f['font_family'] !== '' ? (string) $f['font_family'] : null,
             'font_size' => isset($f['font_size']) && $f['font_size'] !== '' ? (int) $f['font_size'] : null,
             'heading_bold' => isset($f['heading_bold']) && $f['heading_bold'] !== '' ? (bool) (int) $f['heading_bold'] : null,
             'heading_size_step' => isset($f['heading_size_step']) && $f['heading_size_step'] !== '' ? (int) $f['heading_size_step'] : null,
+            'body_alignment' => filled($f['body_alignment'] ?? null) ? (string) $f['body_alignment'] : null,
+            'line_spacing' => isset($f['line_spacing']) && $f['line_spacing'] !== '' ? (float) $f['line_spacing'] : null,
+            'paragraph_space_after' => isset($f['paragraph_space_after']) && $f['paragraph_space_after'] !== '' ? (float) $f['paragraph_space_after'] : null,
+            'first_line_indent' => isset($f['first_line_indent']) && $f['first_line_indent'] !== '' ? (float) $f['first_line_indent'] : null,
+            'left_indent' => isset($f['left_indent']) && $f['left_indent'] !== '' ? (float) $f['left_indent'] : null,
+            'right_indent' => isset($f['right_indent']) && $f['right_indent'] !== '' ? (float) $f['right_indent'] : null,
+            'apply_paragraph_style_to_clauses' => isset($f['apply_paragraph_style_to_clauses']) && $f['apply_paragraph_style_to_clauses'] !== '' ? (bool) $f['apply_paragraph_style_to_clauses'] : null,
+            'margin_top' => isset($f['margin_top']) && $f['margin_top'] !== '' ? (float) $f['margin_top'] : null,
+            'margin_right' => isset($f['margin_right']) && $f['margin_right'] !== '' ? (float) $f['margin_right'] : null,
+            'margin_bottom' => isset($f['margin_bottom']) && $f['margin_bottom'] !== '' ? (float) $f['margin_bottom'] : null,
+            'margin_left' => isset($f['margin_left']) && $f['margin_left'] !== '' ? (float) $f['margin_left'] : null,
+            'footer_text' => filled($f['footer_text'] ?? null) ? (string) $f['footer_text'] : null,
+            'page_numbers' => isset($f['page_numbers']) && $f['page_numbers'] !== '' ? (bool) $f['page_numbers'] : null,
         ];
     }
 

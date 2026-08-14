@@ -6,8 +6,9 @@ use App\Contracts\DeclaresComputedBlocks;
 use App\Contracts\DeclaresPartyFlags;
 use App\Contracts\DocumentGenerator;
 use App\Models\DocumentRequest;
-use App\Services\ClauseLibrary;
+use App\Services\AnswerContextBuilder;
 use App\Services\Clause\ClauseSequenceRenderer;
+use App\Services\ClauseLibrary;
 use App\Services\GrammarResolver;
 use App\Services\PartyGroupAssembler;
 
@@ -51,12 +52,12 @@ use App\Services\PartyGroupAssembler;
  * ClauseToDocxRoundTripTest::test_nested_multilevel_clause_preserves_depth_and_per_level_format()
  * and ::test_repeat_with_nested_if_produces_correct_multilevel_numbering_only_for_matching_items().
  *
- * LEGAL CONTENT CAVEAT: none of the currently-declared top-level flags gate
- * a Structure condition (its one flag, beneficiary.per_stirpes, is scoped
- * inside [[REPEAT:beneficiaries]] and isn't visible for section-level
- * gating) — an admin can reorder/rename/add/remove Will sections today, but
- * a Structure "show only if" condition on this precedent will throw an
- * unknown-flag error until a real top-level flag is added here.
+ * Structure "show only if" conditions: every declared questionnaire field is
+ * automatically usable as a top-level [[IF:...]]/condition flag (see
+ * AnswerContextBuilder — a boolean field's real value, or "was this field
+ * filled in" for anything else), independent of this class declaring
+ * anything itself. beneficiary.per_stirpes remains the only flag this class
+ * declares directly, since it's REPEAT-scoped, not a top-level answer.
  *
  * Optional front matter: if the precedent tags a [[CLAUSE:front_matter]]
  * block, it fully replaces the hardcoded opening sentence below (admin-
@@ -71,16 +72,18 @@ class WillGenerator implements DeclaresComputedBlocks, DeclaresPartyFlags, Docum
         private readonly GrammarResolver $grammar,
         private readonly PartyGroupAssembler $parties,
         private readonly ClauseLibrary $clauses,
+        private readonly AnswerContextBuilder $answerContext,
     ) {}
 
     public function generate(DocumentRequest $documentRequest): array
     {
         $precedent = $documentRequest->precedent;
         $answers = $documentRequest->answers ?? [];
+        $built = $this->answerContext->build($answers, array_keys($precedent->questionnaireFieldsConfig()));
 
         $context = [
-            'answers' => $answers,
-            'flags' => [],
+            'answers' => $built['answers'],
+            'flags' => $built['flags'],
             'items' => $this->parties->forRequest($documentRequest),
         ];
 

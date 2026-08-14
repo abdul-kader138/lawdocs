@@ -5,8 +5,9 @@ namespace App\Services\Generators;
 use App\Contracts\DeclaresPartyFlags;
 use App\Contracts\DocumentGenerator;
 use App\Models\DocumentRequest;
-use App\Services\ClauseLibrary;
+use App\Services\AnswerContextBuilder;
 use App\Services\Clause\ClauseSequenceRenderer;
+use App\Services\ClauseLibrary;
 use App\Services\PartyGroupAssembler;
 
 /**
@@ -71,6 +72,7 @@ class CostsAgreementGenerator implements DeclaresPartyFlags, DocumentGenerator
         private readonly ClauseSequenceRenderer $sequence,
         private readonly PartyGroupAssembler $parties,
         private readonly ClauseLibrary $clauses,
+        private readonly AnswerContextBuilder $answerContext,
     ) {}
 
     public function generate(DocumentRequest $documentRequest): array
@@ -78,13 +80,11 @@ class CostsAgreementGenerator implements DeclaresPartyFlags, DocumentGenerator
         $precedent = $documentRequest->precedent;
         $answers = $documentRequest->answers ?? [];
         $answers['agreement_date'] = now()->format('j F Y');
+        $built = $this->answerContext->build($answers, array_keys($precedent->questionnaireFieldsConfig()));
 
         $context = [
-            'answers' => $answers,
-            'flags' => [
-                'estimate_completion_gst' => (bool) ($answers['estimate_completion_gst'] ?? false),
-                'estimate_fees_expenses_gst' => (bool) ($answers['estimate_fees_expenses_gst'] ?? false),
-            ],
+            'answers' => $built['answers'],
+            'flags' => $built['flags'],
             'items' => $this->parties->forRequest($documentRequest),
         ];
 

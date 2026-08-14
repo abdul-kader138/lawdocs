@@ -12,6 +12,8 @@ use PhpOffice\PhpWord\PhpWord;
 use PhpOffice\PhpWord\Style;
 use PhpOffice\PhpWord\Style\ListItem as ListItemStyle;
 use PhpOffice\PhpWord\Style\Numbering;
+use PhpOffice\PhpWord\Style\Paragraph;
+use PhpOffice\PhpWord\SimpleType\Jc;
 
 class DocxBuilder
 {
@@ -24,6 +26,10 @@ class DocxBuilder
      * registry itself is wiped by the `new PhpWord()` inside build().
      */
     private array $numberingNameByObjectId = [];
+
+    private array $bodyParagraphStyle = [];
+
+    private bool $applyParagraphStyleToClauses = false;
 
     /**
      * Deterministically build a .docx from a generator's structured block
@@ -50,6 +56,22 @@ class DocxBuilder
         $fontSize   = (int) ($formattingOverrides['font_size'] ?? Setting::get('docx_font_size', 12));
         $headingBold = $formattingOverrides['heading_bold'] ?? true;
         $headingSizeStep = (int) ($formattingOverrides['heading_size_step'] ?? 2);
+        $alignment = $formattingOverrides['body_alignment'] ?? Jc::START;
+        $lineSpacing = (float) ($formattingOverrides['line_spacing'] ?? 1.0);
+        $paragraphSpaceAfter = (float) ($formattingOverrides['paragraph_space_after'] ?? 10);
+
+        $this->bodyParagraphStyle = [
+            'alignment' => $alignment,
+            'lineHeight' => $lineSpacing,
+            'spaceAfter' => (int) round($paragraphSpaceAfter * 20),
+            'widowControl' => true,
+            'indentation' => array_filter([
+                'firstLine' => $this->millimetresToTwips($formattingOverrides['first_line_indent'] ?? null),
+                'left' => $this->millimetresToTwips($formattingOverrides['left_indent'] ?? null),
+                'right' => $this->millimetresToTwips($formattingOverrides['right_indent'] ?? null),
+            ], fn ($value) => $value !== null),
+        ];
+        $this->applyParagraphStyleToClauses = (bool) ($formattingOverrides['apply_paragraph_style_to_clauses'] ?? false);
 
         $phpWord->setDefaultFontName($fontFamily);
         $phpWord->setDefaultFontSize($fontSize);
@@ -57,14 +79,38 @@ class DocxBuilder
         // Real Word "Heading N" styles (not just bold text) — shows up in
         // Word's Navigation pane / a lawyer's table of contents.
         for ($depth = 1; $depth <= 4; $depth++) {
-            Style::addTitleStyle($depth, ['bold' => $headingBold, 'size' => $fontSize + (5 - $depth) * $headingSizeStep]);
+            Style::addTitleStyle(
+                $depth,
+                ['bold' => $headingBold, 'size' => $fontSize + (5 - $depth) * $headingSizeStep],
+                ['spaceBefore' => $depth === 1 ? 0 : 240, 'spaceAfter' => 120, 'keepNext' => true],
+            );
         }
 
-        $section = $phpWord->addSection();
+        $section = $phpWord->addSection(array_filter([
+            'marginTop' => $this->millimetresToTwips($formattingOverrides['margin_top'] ?? null),
+            'marginRight' => $this->millimetresToTwips($formattingOverrides['margin_right'] ?? null),
+            'marginBottom' => $this->millimetresToTwips($formattingOverrides['margin_bottom'] ?? null),
+            'marginLeft' => $this->millimetresToTwips($formattingOverrides['margin_left'] ?? null),
+        ], fn ($value) => $value !== null));
         $section->addTitle($title, 1);
 
         foreach ($blocks as $block) {
             $this->addBlock($section, $block);
+        }
+
+        $footerText = $formattingOverrides['footer_text'] ?? null;
+        $pageNumbers = $formattingOverrides['page_numbers'] ?? false;
+
+        if ($footerText || $pageNumbers) {
+            $footer = $section->addFooter();
+
+            if ($footerText) {
+                $footer->addText($footerText, ['size' => max(8, $fontSize - 2)], ['alignment' => Jc::CENTER]);
+            }
+
+            if ($pageNumbers) {
+                $footer->addPreserveText('Page {PAGE} of {NUMPAGES}', ['size' => max(8, $fontSize - 2)], ['alignment' => Jc::END]);
+            }
         }
 
         return $phpWord;
@@ -99,10 +145,17 @@ class DocxBuilder
 
         match ($type) {
             'heading'    => $section->addTitle($text, max(1, min(4, (int) ($block['level'] ?? 2)))),
-            'list_item'  => $section->addListItem($text, 0, $fontStyle ?: null, $listStyle),
+            'list_item'  => $section->addListItem($text, 0, $fontStyle ?: null, $listStyle, $this->listParagraphStyle()),
             'page_break' => $section->addPageBreak(),
-            default      => $section->addText($text, $fontStyle ?: null, ['spaceAfter' => 200]),
+            default      => $section->addText($text, $fontStyle ?: null, $this->bodyParagraphStyle),
         };
+    }
+
+    private function millimetresToTwips(mixed $millimetres): ?int
+    {
+        return $millimetres === null || $millimetres === ''
+            ? null
+            : (int) round((float) $millimetres * 56.692913);
     }
 
     /**
@@ -120,15 +173,48 @@ class DocxBuilder
             match ($el->kind) {
                 'title'         => $section->addTitle($this->flattenRuns($el->runs), $el->titleDepth),
                 'page_break'    => $section->addPageBreak(),
-                'text_run'      => $this->emitRun($section->addTextRun($el->paragraphStyle), $el->runs),
+                'text_run'      => $this->emitRun($section->addTextRun($this->clauseParagraphStyle($el->paragraphStyle)), $el->runs),
                 'list_item_run' => $this->emitRun(
-                    $section->addListItemRun($el->depth, $this->numberingNameFor($el->numberingStyle), $el->paragraphStyle),
+                    $section->addListItemRun($el->depth, $this->numberingNameFor($el->numberingStyle), $this->clauseParagraphStyle($el->paragraphStyle, list: true)),
                     $el->runs
                 ),
                 'table' => $this->addTableElement($section, $el),
                 default => throw new \InvalidArgumentException("Unknown ClauseElement kind [{$el->kind}]."),
             };
         }
+    }
+
+    private function listParagraphStyle(): array
+    {
+        $style = $this->bodyParagraphStyle;
+        unset($style['indentation']['firstLine']);
+
+        return $style;
+    }
+
+    private function clauseParagraphStyle(Paragraph|string|null $source, bool $list = false): Paragraph|string|array|null
+    {
+        if (! $this->applyParagraphStyleToClauses) {
+            return $source;
+        }
+
+        $overrides = $list ? $this->listParagraphStyle() : $this->bodyParagraphStyle;
+
+        if (! $source instanceof Paragraph) {
+            return $overrides;
+        }
+
+        $style = clone $source;
+        $style->setAlignment($overrides['alignment']);
+        $style->setLineHeight($overrides['lineHeight']);
+        $style->setSpaceAfter($overrides['spaceAfter']);
+        $style->setWidowControl(true);
+
+        if ($overrides['indentation'] !== []) {
+            $style->setIndentation($overrides['indentation']);
+        }
+
+        return $style;
     }
 
     /**

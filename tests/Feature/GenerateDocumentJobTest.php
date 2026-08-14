@@ -85,6 +85,19 @@ class GenerateDocumentJobTest extends TestCase
                     'font_size' => 16,
                     'heading_bold' => null,
                     'heading_size_step' => null,
+                    'body_alignment' => null,
+                    'line_spacing' => null,
+                    'paragraph_space_after' => null,
+                    'first_line_indent' => null,
+                    'left_indent' => null,
+                    'right_indent' => null,
+                    'apply_paragraph_style_to_clauses' => null,
+                    'margin_top' => null,
+                    'margin_right' => null,
+                    'margin_bottom' => null,
+                    'margin_left' => null,
+                    'footer_text' => null,
+                    'page_numbers' => null,
                 ]);
         });
 

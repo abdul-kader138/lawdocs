@@ -6,8 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Activitylog\Support\LogOptions;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
+use Spatie\Activitylog\Support\LogOptions;
 
 class DocumentRequest extends Model
 {
@@ -25,7 +25,7 @@ class DocumentRequest extends Model
     protected $fillable = [
         'precedent_id', 'precedent_title_snapshot', 'precedent_jurisdiction_snapshot',
         'client_id', 'requested_by', 'case_reference', 'answers', 'status', 'error_message',
-        'generated_docx_path', 'generated_title', 'generation_snapshot', 'generated_at',
+        'generated_docx_path', 'generated_pdf_path', 'generated_title', 'generation_snapshot', 'generated_at',
         'approved_at', 'approved_by', 'sent_for_signature_at', 'signed_at', 'signed_document_path',
     ];
 

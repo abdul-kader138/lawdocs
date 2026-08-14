@@ -5,8 +5,9 @@ namespace App\Services\Generators;
 use App\Contracts\DeclaresPartyFlags;
 use App\Contracts\DocumentGenerator;
 use App\Models\DocumentRequest;
-use App\Services\ClauseLibrary;
+use App\Services\AnswerContextBuilder;
 use App\Services\Clause\ClauseSequenceRenderer;
+use App\Services\ClauseLibrary;
 use App\Services\PartyGroupAssembler;
 
 /**
@@ -46,6 +47,7 @@ class PowerOfAttorneyGenerator implements DeclaresPartyFlags, DocumentGenerator
         private readonly ClauseSequenceRenderer $sequence,
         private readonly PartyGroupAssembler $parties,
         private readonly ClauseLibrary $clauses,
+        private readonly AnswerContextBuilder $answerContext,
     ) {}
 
     public function generate(DocumentRequest $documentRequest): array
@@ -53,13 +55,11 @@ class PowerOfAttorneyGenerator implements DeclaresPartyFlags, DocumentGenerator
         $precedent = $documentRequest->precedent;
         $answers = $documentRequest->answers ?? [];
         $isEnduring = (bool) ($answers['is_enduring'] ?? false);
+        $built = $this->answerContext->build($answers, array_keys($precedent->questionnaireFieldsConfig()));
 
         $context = [
-            'answers' => $answers,
-            'flags' => [
-                'attorneys_act_jointly' => (bool) ($answers['attorneys_act_jointly'] ?? false),
-                'is_enduring' => $isEnduring,
-            ],
+            'answers' => $built['answers'],
+            'flags' => $built['flags'],
             'items' => $this->parties->forRequest($documentRequest),
         ];
 

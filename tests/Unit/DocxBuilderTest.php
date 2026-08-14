@@ -3,12 +3,17 @@
 namespace Tests\Unit;
 
 use App\Services\DocxBuilder;
+use App\Models\Precedent;
+use App\Services\Clause\ClauseElement;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PhpOffice\PhpWord\Element\ListItemRun;
 use PhpOffice\PhpWord\Element\PageBreak;
+use PhpOffice\PhpWord\Element\PreserveText;
+use PhpOffice\PhpWord\Element\Text;
 use PhpOffice\PhpWord\Element\Title;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Style;
+use PhpOffice\PhpWord\Style\Paragraph;
 use Tests\TestCase;
 
 class DocxBuilderTest extends TestCase
@@ -94,5 +99,80 @@ class DocxBuilderTest extends TestCase
         // step=0 => every heading level renders at the plain font size, not
         // stepped up per level.
         $this->assertEquals(14, $headingStyle->getSize());
+    }
+
+    public function test_professional_page_and_paragraph_formatting_is_applied(): void
+    {
+        $phpWord = app(DocxBuilder::class)->build('Agreement', [
+            ['type' => 'paragraph', 'text' => 'Professional body text.'],
+        ], [
+            'body_alignment' => 'both',
+            'line_spacing' => 1.5,
+            'paragraph_space_after' => 6,
+            'first_line_indent' => 12.7,
+            'left_indent' => 5,
+            'right_indent' => 5,
+            'margin_left' => 38.1,
+            'footer_text' => 'Confidential',
+            'page_numbers' => true,
+        ]);
+
+        $section = $phpWord->getSections()[0];
+        $this->assertEqualsWithDelta(2160, $section->getStyle()->getMarginLeft(), 1);
+
+        $body = collect($section->getElements())->first(fn ($element) => $element instanceof Text);
+        $this->assertSame('both', $body->getParagraphStyle()->getAlignment());
+        $this->assertEquals(1.5, $body->getParagraphStyle()->getLineHeight());
+        $this->assertEquals(120, $body->getParagraphStyle()->getSpaceAfter());
+        $this->assertEqualsWithDelta(720, $body->getParagraphStyle()->getIndentFirstLine(), 1);
+
+        $footerElements = collect($section->getFooters())->first()->getElements();
+        $this->assertTrue(collect($footerElements)->contains(fn ($element) => $element instanceof PreserveText));
+    }
+
+    public function test_formatting_profile_provides_defaults_that_individual_fields_can_override(): void
+    {
+        $precedent = new Precedent([
+            'formatting' => [
+                'profile' => 'legal_traditional',
+                'font_size' => 11,
+            ],
+        ]);
+
+        $formatting = $precedent->formattingConfig();
+
+        $this->assertSame('Times New Roman', $formatting['font_family']);
+        $this->assertSame(11, $formatting['font_size']);
+        $this->assertSame('both', $formatting['body_alignment']);
+        $this->assertTrue($formatting['page_numbers']);
+        $this->assertTrue($formatting['apply_paragraph_style_to_clauses']);
+    }
+
+    public function test_uniform_paragraph_style_applies_to_uploaded_clause_paragraphs(): void
+    {
+        $sourceStyle = new Paragraph(['alignment' => 'center', 'spaceAfter' => 0]);
+        $clause = ClauseElement::textRun(
+            [['text' => 'Preserved bold clause', 'fontStyle' => ['bold' => true]]],
+            $sourceStyle,
+        );
+
+        $phpWord = app(DocxBuilder::class)->build('Agreement', [
+            ['type' => 'raw', 'elements' => [$clause]],
+        ], [
+            'body_alignment' => 'both',
+            'line_spacing' => 1.5,
+            'paragraph_space_after' => 6,
+            'first_line_indent' => 10,
+            'apply_paragraph_style_to_clauses' => true,
+        ]);
+
+        $textRun = collect($phpWord->getSections()[0]->getElements())
+            ->first(fn ($element) => $element instanceof \PhpOffice\PhpWord\Element\TextRun);
+
+        $this->assertSame('both', $textRun->getParagraphStyle()->getAlignment());
+        $this->assertEquals(1.5, $textRun->getParagraphStyle()->getLineHeight());
+        $this->assertEquals(120, $textRun->getParagraphStyle()->getSpaceAfter());
+        $this->assertEqualsWithDelta(567, $textRun->getParagraphStyle()->getIndentFirstLine(), 1);
+        $this->assertTrue($textRun->getElements()[0]->getFontStyle()->isBold());
     }
 }

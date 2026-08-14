@@ -5,6 +5,7 @@ namespace App\Services\Generators;
 use App\Contracts\DeclaresPartyFlags;
 use App\Contracts\DocumentGenerator;
 use App\Models\DocumentRequest;
+use App\Services\AnswerContextBuilder;
 use App\Services\Clause\ClauseSequenceRenderer;
 use App\Services\ClauseLibrary;
 use App\Services\PartyGroupAssembler;
@@ -21,6 +22,7 @@ class TemplateGenerator implements DeclaresPartyFlags, DocumentGenerator
         private readonly ClauseLibrary $clauses,
         private readonly PartyGroupAssembler $parties,
         private readonly TemplateStringRenderer $strings,
+        private readonly AnswerContextBuilder $answerContext,
     ) {}
 
     public function generate(DocumentRequest $documentRequest): array
@@ -28,16 +30,15 @@ class TemplateGenerator implements DeclaresPartyFlags, DocumentGenerator
         $precedent = $documentRequest->precedent;
         $answers = $documentRequest->answers ?? [];
 
-        // Boolean questionnaire answers are directly usable as [[IF:key]]
-        // flags. This keeps no-code precedents self-contained.
-        $flags = collect($answers)
-            ->filter(fn ($value) => is_bool($value))
-            ->mapWithKeys(fn ($value, $key) => [$key => $value])
-            ->all();
+        // Every questionnaire answer is directly usable as an [[IF:key]]
+        // flag (boolean fields as-is, everything else as "was this filled
+        // in"), and any "*_gender" answer auto-gets pronoun siblings — see
+        // AnswerContextBuilder. This keeps no-code precedents self-contained.
+        $built = $this->answerContext->build($answers, array_keys($precedent->questionnaireFieldsConfig()));
 
         $context = [
-            'answers' => $answers,
-            'flags' => $flags,
+            'answers' => $built['answers'],
+            'flags' => $built['flags'],
             'items' => $this->parties->forRequest($documentRequest),
         ];
 
@@ -55,7 +56,7 @@ class TemplateGenerator implements DeclaresPartyFlags, DocumentGenerator
             : $precedent->title;
 
         return [
-            'title' => $this->strings->render($titleTemplate, ['answers' => $answers]),
+            'title' => $this->strings->render($titleTemplate, ['answers' => $built['answers']]),
             'blocks' => $this->sequence->render($precedent, $context, $fallback),
         ];
     }

@@ -59,6 +59,9 @@ class DocumentRequestBatchCsvGenerationTest extends TestCase
         $section->addText('[[/CLAUSE]]');
         $section->addText('[[CLAUSE:executor_powers]]');
         $section->addText('My executor has full powers to administer my estate.');
+        $section->addText('[[IF:is_urgent]]');
+        $section->addText('This matter is to be treated as urgent.');
+        $section->addText('[[/IF]]');
         $section->addText('[[/CLAUSE]]');
         $section->addText('[[CLAUSE:beneficiaries_clause]]');
         $section->addText('[[REPEAT:beneficiaries AS beneficiary]]');
@@ -83,6 +86,7 @@ class DocumentRequestBatchCsvGenerationTest extends TestCase
                 ['name' => 'executor_name', 'label' => 'Executor Name', 'type' => 'text', 'required' => true],
                 ['name' => 'executor_gender', 'label' => 'Executor Gender', 'type' => 'select', 'required' => true, 'options' => ['male' => 'Male', 'female' => 'Female']],
                 ['name' => 'signing_date', 'label' => 'Signing Date', 'type' => 'date', 'required' => false],
+                ['name' => 'is_urgent', 'label' => 'Urgent', 'type' => 'boolean', 'required' => false],
             ],
             'party_groups' => [
                 [
@@ -261,5 +265,34 @@ class DocumentRequestBatchCsvGenerationTest extends TestCase
 
         $this->assertSame(1, DocumentRequest::count());
         $this->assertSame('completed', DocumentRequest::first()->status);
+    }
+
+    /**
+     * Regression guard for AnswerContextBuilder's declared-field backfill:
+     * an optional boolean field ("is_urgent") that the CSV's header doesn't
+     * even mention — not blank in a present column, entirely absent as a
+     * column — must still resolve to a real, non-throwing false flag at
+     * generation time. Before the backfill fix, a declared field missing
+     * from $answers entirely (as CSV-created requests do, unlike the UI
+     * wizard which always pre-seeds every declared field to null) would hit
+     * ConditionEvaluator::unknownFlag and fail generation.
+     */
+    public function test_csv_row_omitting_an_optional_boolean_column_entirely_still_generates_successfully(): void
+    {
+        $this->actingAsAdmin();
+        $precedent = $this->makeBatchTestPrecedent();
+
+        $csv = $this->csv(
+            "case_reference,testator_name,executor_name,executor_gender,beneficiaries.1.name,beneficiaries.1.share\n"
+            ."MATTER-001,Ashley Dewell,Alfred Smith,male,Bob Beneficiary,100\n"
+        );
+
+        Livewire::test(ListDocumentRequests::class)
+            ->callAction('batchGenerateCsv', data: ['precedent_id' => $precedent->id, 'csv' => $csv]);
+
+        $this->assertSame(1, DocumentRequest::count());
+        $documentRequest = DocumentRequest::first();
+        $this->assertSame('completed', $documentRequest->status, $documentRequest->error_message ?? '');
+        $this->assertArrayNotHasKey('is_urgent', $documentRequest->answers);
     }
 }

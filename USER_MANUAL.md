@@ -1,7 +1,7 @@
 ---
 title: LawDocs User Manual
 subtitle: Professional operating guide
-date: Version 1.2 · 13 August 2026
+date: Version 1.7 · 15 August 2026
 ---
 
 > **Purpose.** LawDocs is a staff-facing legal-document assembly system. It combines an approved Word precedent with client information, questionnaire answers, and party details to produce a draft DOCX and, where available, a PDF. It records review, signing, and witness activity; it does not provide legal advice, verify drafting, or send documents to an e-signature provider.
@@ -235,7 +235,14 @@ Deletion removes both the file-manager record and stored file; this screen has n
 
 ### Screen: Document Requests list
 
-The table shows Precedent, Client, Requested By, Status, Approval, Case Reference, and Requested date/time. Use the Client filter to narrow the list. Select **New Document Request** to begin.
+The list is organised for quick triage:
+
+- Use **All**, **My Requests**, **In Progress**, **Needs Review**, or **Failed** at the top. Each tab shows its current request count.
+- Search by document title, client, or case/matter reference. Filter by **Status**, **Precedent**, **Client**, or **Approval**; multiple statuses can be selected and filters remain in place during the session.
+- The main **Document / Matter** column shows the precedent title with the matter reference (or request number) beneath it. Status and approval are colour-coded, and the Requested value shows relative time; hover it for the exact date and time.
+- Select a row to view the request, or open its compact **Actions** menu for **Open request**, **Preview PDF**, approval, and available DOCX/PDF downloads. Only actions currently available for that request are shown.
+- **Case Reference** is hidden by default because it is already shown under the document title. Use the table column control to display it as a separate column when needed.
+- Select **New Document Request** for one request. Use **Batch tools** for the CSV template and batch-generation workflow.
 
 ### Step 1 of 3: Precedent
 
@@ -331,7 +338,8 @@ These starter templates are explicitly demo content and require solicitor review
 1. Enter **Case / Matter Reference** if your filing convention uses one. It is optional but strongly recommended for retrieval.
 2. Read any age warning. An entered testator/principal date of birth below the ordinary minimum age produces a soft warning; it does not block submission because exceptions may exist.
 3. Return to **Details** and perform a final comparison with signed-off client instructions.
-4. Select **Create** / submit the wizard once. Generation normally takes about 10–30 seconds when synchronous processing is configured.
+4. Before submitting, optionally select **Preview Document (.docx)** or **Preview Document (PDF)** at the top of the page — these render the wizard's current answers exactly as entered, including a still-incomplete form, with no document request created and nothing saved. The PDF version opens directly in a new browser tab; the DOCX version downloads (Word files cannot be shown inline in a browser). Use this to catch conditional-wording or repeated-row problems before committing.
+5. Select **Create** / submit the wizard once. Generation normally takes about 10–30 seconds when synchronous processing is configured.
 
 The new request stores a snapshot of the precedent title, jurisdiction, answers, parties, requester, and time. It then moves through these statuses:
 
@@ -365,8 +373,8 @@ Open **View** from the list. The **Request** section displays precedent, client,
 Use the following review procedure:
 
 1. Compare **Submitted Answers** with source instructions.
-2. If permitted and the draft needs review, download or otherwise inspect it according to the firm's controlled review process. The normal download buttons remain locked until approval for review-required precedents.
-3. A user with approval permission selects **Approve for Download** (or **Approve** on the list) and confirms. This records the approver and timestamp.
+2. Select **Preview (PDF)** to read the completed draft in a new browser tab. Unlike Download, this is available as soon as generation completes — before approval — specifically so a reviewer can read the actual wording before deciding whether to approve it, not just trust it blind. It opens inline and downloads nothing.
+3. A user with approval permission selects **Approve for Download** (or **Approve** on the list) and confirms. This records the approver and timestamp. Only after this step do the Download buttons appear for a review-required precedent.
 4. Select **Download .docx** for the editable Word draft.
 5. Select **Download PDF** for a PDF rendition when the server's office converter is available. If the button is absent, download DOCX and follow the firm's approved conversion method.
 
@@ -859,23 +867,96 @@ The Structure tab controls which sections a generated document contains, their o
 
 #### What Structure can and cannot do
 
-- It can add, remove, reorder, rename (via heading text), and conditionally show/hide whole sections, for any of the four included generators.
-- It cannot invent a new condition flag, party group, or computed-block key that the selected generator does not already advertise — those still require a developer. The Structure tab only re-arranges vocabulary the generator already exposes.
+- It can add, remove, reorder, rename (via heading text), and conditionally show/hide whole sections, for any generator — the four specialist generators and the no-code Template generator alike.
+- **Show only if** accepts the same condition as `[[IF:...]]` inside the DOCX: any Questionnaire Field on this precedent, of any type. A Yes/No field gates on its actual answer; any other field type (Text, Number, Date, Select) gates on "did the requester fill this in." An administrator can hide or show an entire section based on a field they themselves just added on the Questionnaire Fields tab — no developer required. A generator may also declare a small number of its own flags on top of this (for example the Will's REPEAT-scoped `beneficiary.per_stirpes`) — those remain usable too, they are not the only option.
 - It does not control a generator's fixed opening wording — use an optional `front_matter` clause tag for that (see "Example 7: optional front matter override" above).
 - Leaving Structure empty is not a stripped-down mode — it simply uses the generator's own built-in default order, which is exactly what every precedent used before Structure existed.
 
+#### Example: hide an entire section from a plain optional field, no developer involved
+
+Goal: a "Special Instructions" section should only appear in the generated document when the requester actually entered something.
+
+1. On **Questionnaire Fields**, add `special_instructions`, type Text (multi-line/Textarea works too), **Required off**.
+2. In the DOCX, tag a clause: `[[CLAUSE:special_instructions_clause]] {{answers.special_instructions}} [[/CLAUSE]]`.
+3. On **Structure**, select **Add section**, heading `Special Instructions`, Content source = Clause tag, Clause tag = `special_instructions_clause`, **Show only if** = `special_instructions`.
+4. Save. Clause Marker Check confirms `special_instructions` is a recognised condition — it is, because every Questionnaire Field is automatically available here.
+5. Generate one test request with the field left blank (section absent, numbering of later sections shifts up automatically) and one with text entered (section present, showing that exact text).
+
+This is the general pattern for "give the client control over which sections appear": add a plain Questionnaire Field for whatever decides it, tag the section's wording as its own clause, and gate it on Structure — entirely inside the admin UI.
+
 ### Formatting tab
 
-The Formatting tab sets the font and heading style for this precedent's generated documents, overriding the firm-wide default set in System Settings → Document Defaults (see Section 13). Leave any field blank to keep using that firm-wide default.
+The Formatting tab gives each precedent a consistent professional document style. Start with a profile, then adjust individual fields when the document has a specific filing or firm requirement. A field left blank falls back to the selected profile and then to the firm-wide default in System Settings → Document Defaults (see Section 13).
+
+| Profile | Recommended use | Starting style |
+|---|---|---|
+| **Legal Traditional** | Wills, powers of attorney, agreements, and general legal drafting | Times New Roman 12pt, justified, 1.15 line spacing, standard 25.4mm margins, bold headings, page numbers. |
+| **Legal Modern** | Client-facing letters and contemporary firm documents | Arial 11pt, left aligned, 1.15 line spacing, standard margins, page numbers. |
+| **Court Filing** | A starting point for documents requiring generous annotation/binding space | Times New Roman 12pt, double spaced, 38.1mm left margin, standard other margins, page numbers. Always confirm current court rules before relying on this profile. |
+| **Custom** | A document with approved firm-specific requirements | Keeps the individual values entered below; no profile defaults are imposed. |
+
+Changing the profile fills its recommended values into the form. Review those values before saving; individual fields can then be changed without creating a new profile.
 
 | Field | Effect |
 |---|---|
-| **Font Family** | Base font name for the generated document, for example `Times New Roman`. |
+| **Font Family** | Base font for generated text: Times New Roman, Arial, Calibri, Georgia, or Garamond. |
 | **Font Size (pt)** | Base body text size, 8–24pt. |
+| **Body Alignment** | Left, Justified, or Centred for generator-authored body paragraphs. |
+| **Line Spacing** | Single, 1.15, 1.5, or Double for generator-authored body paragraphs. |
+| **After Paragraph (pt)** | White space after each generator-authored paragraph. Use spacing rather than empty paragraphs. |
+| **First Line (mm)** | Indents the first line of ordinary body and clause paragraphs. It is intentionally not added to list items. |
+| **Left/Right Indent (mm)** | Insets body paragraphs and generated/imported list paragraphs from the page margins. |
+| **Apply paragraph style to uploaded clauses** | When enabled, applies alignment, line spacing, paragraph spacing, and indentation to uploaded clause paragraphs and lists for uniform output. Inline bold, italic, font runs, tables, and list numbering remain preserved. |
 | **Heading Weight** | Bold or Not bold for every generated heading in this document. |
 | **Heading Size Step (pt per level)** | How many points larger each heading level is than the one below it — 0 makes every heading level the same size. |
+| **Top/Right/Bottom/Left Margin (mm)** | Page margins for the complete generated document. Court and filing rules may require particular values. |
+| **Footer Text** | Optional firm, matter, confidentiality, or document-control notice centred in the footer. Avoid unnecessary client-sensitive information. |
+| **Show page numbers** | Adds `Page X of Y` at the bottom-right of every page. |
 
-Formatting only affects generator-authored text: headings, `front_matter`, and computed blocks. Text captured verbatim from inside a `[[CLAUSE:...]]` block always keeps whatever formatting it has in the uploaded DOCX (bold, italic, paragraph spacing, list styles), unaffected by this tab — that has not changed. Use Formatting when one document type needs to look different from the rest of the firm's output (for example, a costs agreement printed in a smaller size to fit on fewer pages); use the DOCX's own Word styles for anything inside a clause.
+Font, body alignment, line spacing, paragraph spacing, indentation, and heading controls always affect generator-authored content. Generated list items receive the body alignment, spacing, and left/right indentation without a first-line indent. When **Apply paragraph style to uploaded clauses** is enabled, the same paragraph layout is merged into clause paragraphs and lists; inline bold, italic, explicit font runs, tables, and numbering remain preserved. When it is disabled, clause paragraph layout remains exactly as stored in the uploaded DOCX. Page margins, footer text, and page numbering apply to the complete generated document.
+
+For a consistent result, format every uploaded clause with the same approved Word styles as the selected profile. A profile cannot overwrite deliberately preserved formatting inside a clause. After any formatting change, generate a realistic multi-page test and inspect both DOCX and PDF for headings stranded at page bottoms, list indentation, table width, footer collisions, page numbering, signature space, and compliance with current filing requirements.
+
+### Precedent quality assurance
+
+Every saved precedent has two QA panels below its edit form: **Automated Test Scenarios** and **Quality Assurance Runs**. QA does not replace solicitor review. It provides repeatable technical evidence that markers resolve, expected wording is present or absent, and reviewers can see which configuration areas changed.
+
+#### Add an automated test scenario
+
+1. Save the precedent first, then open its Edit page.
+2. Under **Automated Test Scenarios**, select **New automated test scenario**.
+3. Enter a unique, descriptive name such as `No alternate executor — Public Trustee fallback`.
+4. Enter **Answers** as a JSON object using the precedent's Questionnaire Field names, for example `{"testator_name":"Jane Doe","alternate_executor_name":null}`.
+5. If needed, enter **Party rows** as a JSON object whose keys are Party Group keys and values are arrays of rows, for example `{"beneficiaries":[{"name":"Alex Doe","share":100,"gender":"male"}]}`.
+6. Optionally enter the exact expected generated title.
+7. Add short, distinctive phrases under **Output must include** and **Output must not include**. Test legal outcomes rather than generic words that could appear elsewhere.
+8. Leave **Active** on and save.
+
+Create paired scenarios for every conditional branch: Yes/No, value present/blank, one/many party rows, substitute/fallback paths, and boundary cases. Scenario execution occurs inside a rolled-back database transaction; it does not leave a real Document Request behind.
+
+#### Run and interpret QA
+
+Select **Run QA** at the top of Precedent Edit. The saved report has one of three statuses:
+
+- **Passed** — no technical validation errors/warnings and every active scenario passed.
+- **Warning** — generation tests passed, but a non-blocking concern needs review (for example, no active scenarios or a required no-code field not referenced in template text).
+- **Failed** — a blocking validation error or scenario failure occurred.
+
+The validation report checks the private source DOCX exists, saved marker validation is clear, questionnaire and party-group keys are not duplicated, required no-code fields are referenced, and active scenarios exist. Each scenario reports title/include/exclude mismatches or the exact generation exception.
+
+When QA finds a problem, the notification now shows up to the first three issue or failed-scenario details and remains visible until dismissed. Scroll to **Quality Assurance Runs**: the **Validation issues** column shows the issue count and the first issue message directly in the row. Select **View issues** for the complete report, including:
+
+- **Validation issues** — severity, technical code, and the full explanation;
+- **Scenario results** — each passed or failed scenario and its exact failed expectation or generation error; and
+- **Changes from baseline** — the affected configuration area with its before and after values.
+
+For example, `WARNING [no_scenarios] No active automated test scenarios are configured` means the precedent itself may still generate, but it has no repeatable test case. Add and activate at least one realistic scenario, save it, and run QA again. Do not treat the issue count alone as sufficient evidence; open the full report and resolve or formally assess every listed item.
+
+#### Baseline comparison and stale results
+
+After an approved review point, select **Set QA Baseline**. Future runs compare against that saved snapshot, including the source DOCX SHA-256 checksum, extracted template text, fields, party groups, structure, formatting, mapping, generator, jurisdiction, review settings, and test scenarios. The report displays before/after values for changed areas.
+
+A QA run is marked **Stale** whenever the current precedent or scenario configuration no longer matches the fingerprint tested by that run. Run QA again after every change. Setting a baseline records a comparison reference; it does not approve or publish the precedent. This release provides structured and extracted-text comparison, not pixel-by-pixel PDF comparison, so reviewers must still inspect generated DOCX and PDF samples visually.
 
 ### Questionnaire Fields tab
 
@@ -1101,7 +1182,18 @@ Imported rows remain editable. Fields with no matching Client Contact value—su
 | Add a repeatable block of people/items to the request | Add a Party Group |
 | Include, exclude, or repeat wording in the generated document | Use a supported named CLAUSE with IF and/or REPEAT markers |
 
-There is no generic **Add Dynamic Section** button. The chosen generator controls which named clauses and IF flags are available. If a new section needs a flag or clause the generator does not advertise, an administrator cannot invent it in the UI; a developer must extend the generator first.
+There is no generic **Add Dynamic Section** button, but the named clauses/wording inside one are almost entirely admin-controlled. Every Questionnaire Field on the precedent — of any type, not just Yes/No — is automatically a valid `[[IF:...]]` condition: a Yes/No field evaluates as its actual answer, and any other field type (Text, Number, Date, Select) evaluates as **true when the requester filled it in, false when left blank**. This is why Example E below works with no developer involvement at all — an optional field becomes a switch just by existing. A generator can still declare a handful of its own flags on top of this (shown in the on-screen reference next to the file upload), which win if a name collides, but for the common case of "show this paragraph only if the requester answered/entered something," a plain Questionnaire Field is all that is needed.
+
+The only case that genuinely needs a developer is a document type requiring computed logic that cannot be expressed as a plain condition or repeat — see "Choosing a generator" below for how the no-code **Template** generator covers everything short of that.
+
+#### Choosing a generator: Template vs. a specialist generator
+
+| Generator | When to use it | What it can express without a developer |
+|---|---|---|
+| **Template** | Any new document type that is built entirely from clauses, placeholders, and repeatable party rows — the default choice for a brand-new precedent | Everything on this page: verbatim clauses, `[[IF:...]]`/`[[ELSE]]` on any Questionnaire Field, `[[REPEAT:...]]` over any configured Party Group, `{{answers.field}}` placeholders, and auto-computed pronouns (Example F) |
+| **Will / Power of Attorney / Enduring Guardianship / Costs Agreement** | The document needs a specific piece of computed wording these generators already provide (for example, the Will's executor/alternate-executor/Public Trustee appointment chain), or the firm is deliberately reusing one of the maintained starter precedents | The same marker features as Template, plus that generator's own hand-written computed paragraph(s) |
+
+Selecting **Template** as the Document Generator, then tagging every needed `[[CLAUSE:...]]` in the uploaded DOCX, is the fastest path from "the firm needs a new document type" to an activated precedent with no code changes at all — see "Complete worked configuration: a fully dynamic precedent with the Template generator" later in this section for a full walkthrough.
 
 #### Example A: dynamic Yes/No document section using an existing flag
 
@@ -1169,6 +1261,41 @@ Goal: prefill Principal's Full Name without retyping.
 4. Confirm Principal's Full Name is prefilled but still editable.
 5. The generator can use the answer directly, and a marked clause can reference it as `{{answers.principal_name}}` where supported.
 
+#### Example E: conditional wording driven by an optional field, no Yes/No toggle needed
+
+Goal: name an alternate executor only when the requester actually supplies one — without adding a separate Yes/No field just to ask "is there an alternate?"
+
+1. Create Questionnaire Field `alternate_executor_name`, type Text, **Required off**.
+2. Inside the relevant clause, add:
+
+```text
+[[IF:alternate_executor_name]]
+If the primary executor cannot act, I appoint {{answers.alternate_executor_name}} as my executor.
+[[ELSE]]
+If the primary executor cannot act, I appoint the Public Trustee as my executor.
+[[/IF]]
+```
+
+3. Test one request leaving Alternate Executor Name blank: confirm the Public Trustee wording appears.
+4. Test a second request with a name entered: confirm that exact name appears and the Public Trustee wording does not.
+
+This works because any Questionnaire Field — not only Yes/No fields — is a valid `[[IF:...]]` condition: text, number, date, and select fields all evaluate as true once the requester has entered something, false while blank.
+
+#### Example F: automatic pronoun agreement from a Gender field
+
+Goal: say "he"/"she" correctly for a named person without a generator computing it in PHP.
+
+1. Create Questionnaire Field named exactly `executor_gender` (any field name ending in `_gender`), type Select, options Male/Female, Required on.
+2. Anywhere in the same clause, reference `{{answers.executor_gender_pronoun_subject}}`, `..._pronoun_object}}`, `..._pronoun_possessive}}`, or `..._pronoun_reflexive}}` — for example:
+
+```text
+I appoint {{answers.executor_name}} as my executor. If {{answers.executor_gender_pronoun_subject}} is unable to act, I appoint the Public Trustee.
+```
+
+3. Generate one test request with Male selected and one with Female selected; confirm "he"/"his"/"himself" versus "she"/"her"/"herself" appear correctly, with no developer writing any pronoun logic.
+
+The four pronoun placeholders only exist when the underlying `_gender` field actually has a value — reference one unconditionally only on a field marked Required, or wrap the reference in `[[IF:...]]` if the field is optional, the same way Example E gates `alternate_executor_name`.
+
 #### Dynamic-section verification matrix
 
 For every dynamic section, document and test:
@@ -1196,6 +1323,99 @@ This example shows how all tabs connect.
 7. Confirm output and approval before switching Active on.
 
 The safest design sequence is **generator → questionnaire fields → party groups → client mapping → DOCX markers → test requests → approval → activation**. Changing a technical key later requires checking every downstream reference.
+
+### Complete worked configuration: a fully dynamic precedent with the Template generator, then generating documents from it
+
+This walkthrough builds a brand-new document type — a Client Engagement Letter — from nothing, using only the no-code **Template** generator and every feature covered in this manual: bulk CSV import for both Questionnaire Fields and Party Group row fields, conditional wording on an optional field, automatic pronoun agreement, a repeated section, Structure, and Formatting. It then generates documents from the finished precedent both one at a time and in a batch. No developer involvement is required anywhere in this walkthrough.
+
+**Step 1 — Details tab.** Title = **Client Engagement Letter**; Category = your firm's choice; Jurisdiction = NSW; **Document Generator = Template**; Requires review = On; Active = Off during setup.
+
+**Step 2 — Questionnaire Fields, via CSV bulk import.** Select **Import Fields from CSV** and upload a file with this content:
+
+```text
+name,label,type,required,description,options
+client_name,Client's Full Name,text,yes,The person or entity engaging the firm,
+client_gender,Client's Gender,select,yes,Used for pronoun agreement,male=Male|female=Female
+engagement_date,Engagement Date,date,yes,When the retainer begins,
+has_conflict_check,Conflict Check Completed?,boolean,yes,Confirms a conflict check was run before engagement,
+referral_source,Referred By (optional),text,no,Leave blank if the client approached the firm directly,
+```
+
+This creates five fields in one pass, covering every input type this manual documents: text, select, date, Yes/No, and an optional text field. `client_gender` and `referral_source` are deliberately named/typed to be reused in Step 5 for automatic pronouns and conditional wording.
+
+**Step 3 — Party Groups.** On the Party Groups tab, create a group manually first — key `matter_contacts`, label **Additional Contacts**, minimum rows 0 (this group is optional; not every matter has extra contacts). Then select **Import Party Group Fields from CSV** and upload:
+
+```text
+group_key,name,label,type,required,description,options
+matter_contacts,name,Contact Name,text,yes,,
+matter_contacts,email,Email Address,text,yes,,
+```
+
+The group must exist before the CSV import — the import only fills in a group's row fields, it never creates the group itself.
+
+**Step 4 — Client Mapping.** Map Client's Full Name to `client_name`.
+
+**Step 5 — Template File.** Upload a DOCX tagging these clauses, each demonstrating a different feature from this section:
+
+```text
+[[CLAUSE:front_matter]]
+This engagement letter is between the firm and {{answers.client_name}}, dated {{answers.engagement_date}}.
+[[/CLAUSE]]
+
+[[CLAUSE:referral_note]]
+[[IF:referral_source]]
+We note this engagement was referred by {{answers.referral_source}}.
+[[/IF]]
+[[/CLAUSE]]
+
+[[CLAUSE:conflict_statement]]
+[[IF:has_conflict_check]]
+A conflict check has been completed and no conflict was identified.
+[[ELSE]]
+A conflict check is still pending and will be completed before work commences.
+[[/IF]]
+[[/CLAUSE]]
+
+[[CLAUSE:pronoun_note]]
+If {{answers.client_gender_pronoun_subject}} requires any changes to these terms, please contact us in writing.
+[[/CLAUSE]]
+
+[[CLAUSE:contacts_clause]]
+[[REPEAT:matter_contacts AS contact]]
+Copy correspondence to {{contact.name}} ({{contact.email}}).
+[[/REPEAT]]
+[[/CLAUSE]]
+```
+
+`referral_note` uses `[[IF:referral_source]]` — a plain optional Text field, not a Yes/No — exactly as in Example E. `conflict_statement` uses a real Yes/No field with `[[ELSE]]`. `pronoun_note` uses the automatic pronoun placeholder from Example F: because `client_gender` is Required, referencing `{{answers.client_gender_pronoun_subject}}` unconditionally is safe. `contacts_clause` repeats once per row in the optional `matter_contacts` group and simply produces nothing when a request has none.
+
+**Step 6 — Structure tab.** Add and order the non-front-matter sections: Referral Note, Conflict Statement, Contact, Additional Contacts — matching `referral_note`, `conflict_statement`, `pronoun_note`, and `contacts_clause` respectively.
+
+**Step 7 — Formatting tab.** Select **Legal Modern** for this client-facing letter, or the firm's approved profile. Review font, alignment, line and paragraph spacing, margins, footer, and page numbering. Generate a multi-page test rather than judging formatting from the flattened Extracted Text preview.
+
+**Step 8 — Save and verify.** Inspect **Clause Marker Check** — it must be clear. Open the **Available flags, party groups & computed blocks** reference next to the file upload: it now lists every Questionnaire Field (not only the Yes/No one) as a usable `[[IF:...]]` target, confirming Step 5's fields all resolve correctly, plus `matter_contacts` as a usable `[[REPEAT:...]]` group.
+
+**Step 9 — Test, then activate.** Generate at least four test requests: referral source blank vs. filled, conflict check Yes vs. No, one request with zero additional contacts and one with two. Confirm every branch and the repeated section behave as expected, then switch Active on.
+
+#### Now generate documents from the finished precedent
+
+**A single document, with preview.** Open **New Document Request**, select the Client Engagement Letter precedent, and fill in Details. Before submitting, select **Preview Document (PDF)** at the top of the page as many times as needed — it renders the form's current answers exactly as they stand, with no document request actually created, so you can check the referral/conflict/pronoun wording before committing. When satisfied, select **Create**. If the precedent requires review, open the resulting request and select **Preview (PDF)** to read the completed draft before approving — this is available immediately, it does not wait for approval — then **Approve for Download** and download.
+
+**Many documents at once, from a spreadsheet.** From the Document Requests list, select **Download Batch CSV Template** and choose the Client Engagement Letter precedent. The downloaded file's header row already matches this precedent's exact fields and party-group columns:
+
+```text
+case_reference,client_id,client_name,client_gender,engagement_date,has_conflict_check,referral_source,matter_contacts.1.name,matter_contacts.1.email,matter_contacts.2.name,matter_contacts.2.email
+```
+
+Party-group columns follow the pattern `group_key.slot.field` — `matter_contacts.1.name`/`matter_contacts.1.email` is the first additional contact on that row's document, `matter_contacts.2.*` the second, and so on; leave a slot's columns entirely blank to produce a document with fewer contacts than the template has columns for. Fill in one row per document — for example:
+
+```text
+case_reference,client_id,client_name,client_gender,engagement_date,has_conflict_check,referral_source,matter_contacts.1.name,matter_contacts.1.email,matter_contacts.2.name,matter_contacts.2.email
+MATTER-101,,Priya Anand,female,2026-08-20,yes,,Tom Whitfield,tom@example.com,,
+MATTER-102,,Susan Wild,female,2026-08-21,no,Referred by Ashley Dewell,,,,
+```
+
+Select **Batch Generate from CSV**, choose the same precedent, and upload the file. The first screen validates every row and shows **"N will be generated, M skipped"** with the reason for each skipped row — nothing is created yet. Review the count, then select **Confirm & Generate**. Each valid row becomes its own trackable Document Request, visible and downloadable individually from the list exactly like a request created through the wizard. A single batch file is capped at 200 rows; split a larger spreadsheet into multiple uploads.
 
 ## 11. User administration (super administrator)
 
@@ -1336,7 +1556,7 @@ Select **System Settings**, change one or more tabs, then select **Save**. Appea
 ### Document Defaults
 
 - Set generated DOCX font family and size (8–24 pt).
-- **Generate documents in the background** must be enabled only when a continuously supervised queue worker is operating. Otherwise requests remain Pending indefinitely.
+- **Generate documents in the background** must be enabled only when a continuously supervised queue worker is operating. Otherwise requests remain Pending indefinitely. A standard deployment provisions this worker automatically (a systemd service restarted on every deploy) — check with an administrator that it is running before turning this on. Batch CSV generation always runs synchronously regardless of this setting.
 
 ### Security
 
@@ -1360,6 +1580,10 @@ Select **System Settings**, change one or more tabs, then select **Save**. Appea
 | Download buttons are missing | Not Completed, approval still required, insufficient permission; PDF converter may be unavailable | Check Status and Approval; request approval. Use DOCX if only PDF is unavailable. |
 | Cannot add a witness | Witness name matches a recorded document party | Confirm independence and spelling; do not bypass the control without legal review. |
 | Branding image does not appear | Public storage link/configuration issue | Administrator should verify storage publication; do not repeatedly upload duplicates. |
+| Formatting looks inconsistent | Uploaded clause paragraph styling is being preserved while generated text uses the selected profile | Enable **Apply paragraph style to uploaded clauses**, or apply the firm's approved styles inside the source DOCX; then test both DOCX and PDF. |
+| Footer or page number overlaps content | Bottom margin/footer content is too small/long for the output | Shorten the footer or increase the bottom margin, then regenerate a multi-page test. |
+| QA run is Stale | The precedent template/configuration or its test scenarios changed after that run | Review the changes and run QA again; do not rely on the old result. |
+| Automated scenario fails | Expected title/text does not match, answers/party JSON is incomplete, or generation raised an error | Open View Report, correct the precedent or scenario expectation, and rerun QA. |
 | 2FA code fails | Device time drift, wrong account, expired code, or used recovery code | Wait for a fresh code, check automatic time, or use one unused recovery code. |
 
 When escalating, provide the case reference, request ID/URL, status, exact error text, approximate time, and the action attempted. Do not email client data or documents through unapproved channels.
@@ -1368,7 +1592,7 @@ When escalating, provide the case reference, request ID/URL, status, exact error
 
 LawDocs stores staff accounts and roles; client identity/contact/address/notes; reusable client contacts; precedents and private DOCX templates; questionnaire and party-group configuration; requests, answer snapshots and party rows; generated DOCX paths; approvals; signature timestamps; witnesses; optional signed-document files; per-user File Manager folders/files and metadata; and read-only audit activity with actors, subjects, changed values, and selected request properties such as IP addresses. Templates, generated documents, executed copies, and File Manager content use private application storage; avatars and branding use public storage.
 
-The current repository database inspected for this manual contains one administrator account and no migrated client, precedent, or document-request tables. The repository also includes an optional, non-default demo seeder with three sample clients, three starter precedents, example users, and example request states. Demo credentials/data must never be deployed as production credentials or treated as real legal precedents.
+The repository includes starter precedents and demonstration clients, users, and request states in its default seed process. These records exist only to demonstrate the workflow. Demo credentials must be changed or removed before public production access, and bundled precedent wording must never be treated as solicitor-approved merely because it was installed by the seeder.
 
 Follow the firm's retention, access-control, privacy, backup, and breach-response policies. Use least-privilege roles, keep 2FA enabled, avoid unnecessary personal data in Notes, and never treat deleting a UI record as proof that all backups or historical files have been erased.
 
@@ -1402,4 +1626,4 @@ Follow the firm's retention, access-control, privacy, backup, and breach-respons
 
 ---
 
-**Document control:** This manual describes the application code and bundled data as inspected on 11 August 2026. Screen labels may change after future releases or local configuration. Firm procedure and current legal advice take precedence over this operational guide.
+**Document control:** This manual describes the application code and bundled data as inspected on 15 August 2026. Screen labels may change after future releases or local configuration. Firm procedure and current legal advice take precedence over this operational guide.
