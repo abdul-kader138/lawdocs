@@ -213,6 +213,14 @@ class DocumentRequestResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
+                Action::make('previewPdf')
+                    ->label('Preview (PDF)')
+                    ->icon('heroicon-o-eye')
+                    ->color('gray')
+                    ->url(fn (DocumentRequest $record) => route('document-requests.preview-pdf', $record))
+                    ->openUrlInNewTab()
+                    ->visible(fn (DocumentRequest $record) => $pdfExportAvailable && $record->status === 'completed'),
+
                 Action::make('approve')
                     ->label('Approve')
                     ->icon('heroicon-o-check-badge')

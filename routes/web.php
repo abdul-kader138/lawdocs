@@ -4,6 +4,7 @@ use App\Http\Controllers\DownloadDocumentRequestController;
 use App\Http\Controllers\DownloadDocumentRequestPdfController;
 use App\Http\Controllers\DownloadSignedDocumentController;
 use App\Http\Controllers\Panel\DocumentController;
+use App\Http\Controllers\PreviewDocumentRequestPdfController;
 use App\Http\Middleware\RequirePanelUser;
 use Illuminate\Support\Facades\Route;
 
@@ -17,6 +18,9 @@ Route::middleware(['web', 'auth'])->group(function () {
 
     Route::get('/document-requests/{documentRequest}/download-pdf', DownloadDocumentRequestPdfController::class)
         ->name('document-requests.download-pdf');
+
+    Route::get('/document-requests/{documentRequest}/preview-pdf', PreviewDocumentRequestPdfController::class)
+        ->name('document-requests.preview-pdf');
 
     Route::get('/document-requests/{documentRequest}/download-signed', DownloadSignedDocumentController::class)
         ->name('document-requests.download-signed');

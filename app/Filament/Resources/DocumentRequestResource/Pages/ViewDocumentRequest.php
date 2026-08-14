@@ -23,6 +23,15 @@ class ViewDocumentRequest extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('previewPdf')
+                ->label('Preview (PDF)')
+                ->icon('heroicon-o-eye')
+                ->color('gray')
+                ->url(fn (DocumentRequest $record) => route('document-requests.preview-pdf', $record))
+                ->openUrlInNewTab()
+                ->visible(fn (DocumentRequest $record) => $record->status === 'completed'
+                    && app(DocxToPdfConverter::class)->isAvailable()),
+
             Action::make('approve')
                 ->label('Approve for Download')
                 ->icon('heroicon-o-check-badge')
