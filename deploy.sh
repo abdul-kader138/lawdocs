@@ -6,6 +6,8 @@ APP_DIR="${APP_DIR:-/var/www/lawdocs}"
 BRANCH="${BRANCH:-main}"
 PHP_BIN="${PHP_BIN:-php}"
 COMPOSER_BIN="${COMPOSER_BIN:-composer}"
+WEB_USER="${WEB_USER:-www-data}"
+WEB_GROUP="${WEB_GROUP:-www-data}"
 
 cd "$APP_DIR"
 
@@ -70,6 +72,14 @@ fi
 "$PHP_BIN" artisan storage:link
 "$PHP_BIN" artisan optimize
 "$PHP_BIN" artisan queue:restart
+
+if id "$WEB_USER" >/dev/null 2>&1; then
+    chown -R "$WEB_USER:$WEB_GROUP" storage bootstrap/cache
+    chmod -R ug+rwX storage bootstrap/cache
+else
+    echo "Error: web-server user '$WEB_USER' does not exist." >&2
+    exit 1
+fi
 
 nginx -t
 systemctl restart nginx

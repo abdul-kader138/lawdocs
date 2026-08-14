@@ -153,14 +153,23 @@ class PrecedentSeeder extends Seeder
 
     private function seedFromFixture(string $fixture, string $title, string $category, ?string $generatorClass, string $description, array $fields, array $partyGroups = []): void
     {
-        if (Precedent::where('title', $title)->exists()) {
-            return;
-        }
-
         $fixturePath = database_path("seeders/fixtures/{$fixture}");
         $storedPath = "precedents/{$fixture}";
 
-        Storage::disk('local')->put($storedPath, file_get_contents($fixturePath));
+        // The database may have been imported without the private storage
+        // directory. Repair the seeded precedent file even when its row
+        // already exists, otherwise regeneration fails on the live server.
+        if (! Storage::disk('local')->exists($storedPath)) {
+            $stored = Storage::disk('local')->put($storedPath, file_get_contents($fixturePath));
+
+            if (! $stored) {
+                throw new \RuntimeException("Unable to store precedent fixture: {$storedPath}");
+            }
+        }
+
+        if (Precedent::where('title', $title)->exists()) {
+            return;
+        }
 
         Precedent::create([
             'title' => $title,
