@@ -110,6 +110,16 @@ class EditPrecedent extends EditRecord
                     return redirect(PrecedentResource::getUrl('edit', ['record' => $copy]));
                 }),
 
+            Actions\Action::make('downloadFieldsCsvSample')
+                ->label('Download Sample CSV (Questionnaire Fields)')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('gray')
+                ->action(fn () => response()->streamDownload(
+                    fn () => print(self::questionnaireFieldsCsvSample()),
+                    'questionnaire-fields-sample.csv',
+                    ['Content-Type' => 'text/csv'],
+                )),
+
             Actions\Action::make('importFieldsCsv')
                 ->label('Import Fields from CSV')
                 ->icon('heroicon-o-arrow-up-tray')
@@ -121,7 +131,8 @@ class EditPrecedent extends EditRecord
                             .'type must be one of: '.implode(', ', FieldCsvRowValidator::VALID_TYPES).'. '
                             .'required accepts yes/true/1 or no/false/0 (blank = required, to match a new field\'s default). '
                             .'options (only for type "select") is pipe-separated key=Label pairs, e.g. male=Male|female=Female. '
-                            .'A row whose name matches an existing field updates it in place; otherwise it\'s appended.'),
+                            .'A row whose name matches an existing field updates it in place; otherwise it\'s appended. '
+                            .'Use "Download Sample CSV" above for a ready-made example file.'),
 
                     FileUpload::make('csv')
                         ->label('CSV File')
@@ -133,6 +144,16 @@ class EditPrecedent extends EditRecord
                     $this->importQuestionnaireFieldsCsv($record, $data['csv']);
                 }),
 
+            Actions\Action::make('downloadPartyGroupFieldsCsvSample')
+                ->label('Download Sample CSV (Party Group Fields)')
+                ->icon('heroicon-o-document-arrow-down')
+                ->color('gray')
+                ->action(fn () => response()->streamDownload(
+                    fn () => print(self::partyGroupFieldsCsvSample()),
+                    'party-group-fields-sample.csv',
+                    ['Content-Type' => 'text/csv'],
+                )),
+
             Actions\Action::make('importPartyGroupFieldsCsv')
                 ->label('Import Party Group Fields from CSV')
                 ->icon('heroicon-o-arrow-up-tray')
@@ -142,7 +163,8 @@ class EditPrecedent extends EditRecord
                         ->label('Expected columns')
                         ->content('group_key, name, label, type, required, description, options — one row per row-field. '
                             .'group_key must match an existing Party Group key on this precedent (create the group on the Party Groups tab first — this only fills in its fields). '
-                            .'The other columns are the same as the Questionnaire Fields import above.'),
+                            .'The other columns are the same as the Questionnaire Fields import above. '
+                            .'Use "Download Sample CSV" above for a ready-made example file.'),
 
                     FileUpload::make('csv')
                         ->label('CSV File')
@@ -156,6 +178,44 @@ class EditPrecedent extends EditRecord
 
             ])->label('More actions')->icon('heroicon-m-ellipsis-vertical')->color('gray')->button(),
         ];
+    }
+
+    private static function questionnaireFieldsCsvSample(): string
+    {
+        $rows = [
+            ['name', 'label', 'type', 'required', 'description', 'options'],
+            ['full_name', 'Full Name', 'text', 'yes', 'Full legal name of the party', ''],
+            ['date_of_birth', 'Date of Birth', 'date', 'yes', 'Date of birth of the party', ''],
+            ['gender', 'Gender', 'select', 'no', 'Gender of the party', 'male=Male|female=Female|other=Other'],
+            ['notes', 'Additional Notes', 'textarea', 'no', 'Any additional notes about the party', ''],
+        ];
+
+        return self::rowsToCsv($rows);
+    }
+
+    private static function partyGroupFieldsCsvSample(): string
+    {
+        $rows = [
+            ['group_key', 'name', 'label', 'type', 'required', 'description', 'options'],
+            ['spouse', 'full_name', 'Full Name', 'text', 'yes', 'Full legal name of the spouse', ''],
+            ['spouse', 'date_of_birth', 'Date of Birth', 'date', 'yes', 'Date of birth of the spouse', ''],
+        ];
+
+        return self::rowsToCsv($rows);
+    }
+
+    /** @param  array<int, array<int, string>>  $rows */
+    private static function rowsToCsv(array $rows): string
+    {
+        $handle = fopen('php://temp', 'r+');
+        foreach ($rows as $row) {
+            fputcsv($handle, $row);
+        }
+        rewind($handle);
+        $csv = stream_get_contents($handle);
+        fclose($handle);
+
+        return $csv;
     }
 
     private function importQuestionnaireFieldsCsv(Precedent $record, UploadedFile $csv): void

@@ -1,10 +1,86 @@
 ---
 title: LawDocs User Manual
 subtitle: Professional operating guide
-date: Version 1.7 · 15 August 2026
+date: Version 1.9 · 15 August 2026
 ---
 
 > **Purpose.** LawDocs is a staff-facing legal-document assembly system. It combines an approved Word precedent with client information, questionnaire answers, and party details to produce a draft DOCX and, where available, a PDF. It records review, signing, and witness activity; it does not provide legal advice, verify drafting, or send documents to an e-signature provider.
+
+\newpage
+
+## Quick Start by role {.unnumbered}
+
+Use this section for routine work. Follow the linked full section the first time you perform a task or whenever a warning, failed status, or unfamiliar field appears.
+
+### Requesting staff
+
+1. Sign in and check the Dashboard for failed or in-progress work.
+2. Open **Clients**, search before creating a duplicate, and confirm the client's current details and contacts.
+3. Open **Document Requests** and select **New Document Request**.
+4. Select the client and approved precedent. Confirm that client-prefilled answers remain current.
+5. Complete every required questionnaire field and party row. Check names, dates, addresses, roles, shares, substitutes, and row order against instructions.
+6. Add the firm's case/matter reference and submit once.
+7. Open the completed request and review **Submitted Answers**, the DOCX, and the PDF where available. Escalate generation failures with the request ID, exact error, and time.
+8. If a correction is required, use **Regenerate** so the original remains in the audit history.
+
+Full guidance: **Sections 5–9**. Never treat **Completed** as legal approval.
+
+### Reviewing staff
+
+1. Open **Document Requests → Needs Review**.
+2. Select the row and compare the submitted answers, generated title, clauses, parties, formatting, pagination, signature areas, and jurisdiction-specific requirements against approved instructions.
+3. If anything is wrong, do not approve. Correct through **Regenerate** or return the precedent/configuration to an authorised operator.
+4. If the draft passes the firm's review, select **Approve for Download** and confirm.
+5. Download the authorised format and record sending, signing, witnesses, and the executed copy as each event occurs.
+
+Full guidance: **Sections 8–9**. Approval records a human decision; LawDocs does not perform the legal review.
+
+### Precedent operators
+
+1. Work on an inactive precedent until configuration and review are complete.
+2. Use stable technical names for questionnaire fields and party groups. Configure client mapping only after both sides exist.
+3. Upload the private DOCX and resolve every Clause Marker Check error.
+4. Configure Structure, Formatting, fields, mapping, and party groups; save before testing.
+5. Add paired automated scenarios for each conditional branch and representative one/many/blank cases.
+6. Select **Run QA**, open every warning or failure, generate realistic samples, and inspect both DOCX and PDF visually.
+7. After authorised review, set the QA baseline and activate the precedent. Run QA again after every change.
+
+Full guidance: **Section 10**. A passing automated test does not certify the legal wording.
+
+### Super administrators
+
+1. Maintain least-privilege roles, category restrictions, 2FA policy, and verified staff accounts.
+2. Review failed requests, audit events, storage capacity, queue processing, email, and PDF conversion.
+3. Confirm backups and restoration procedures outside LawDocs; deletion in the interface is not proof of backup erasure.
+4. Test configuration changes in accordance with firm change control and preserve required audit evidence.
+
+Full guidance: **Sections 11–16**.
+
+## Task index {.unnumbered}
+
+| I need to… | Go to |
+|---|---|
+| Sign in, configure 2FA, or use a recovery code | Section 3, **Sign in and account security** |
+| Understand what each navigation item does | Section 2, **Screen map and navigation** |
+| Create or update a client/contact | Section 5, **Clients and contacts** |
+| Upload, organise, or delete working files | Section 6, **Documents file manager** |
+| Create one document request | Section 7, **complete walkthrough** |
+| Generate many requests from CSV | Section 7, **Many documents at once** |
+| Diagnose Pending, Failed, or missing downloads | Sections 7–8 and Section 14 |
+| Review, approve, preview, or download a draft | Section 8 |
+| Correct a request without overwriting history | Section 8, **Regenerate an existing request** |
+| Record sending, witnesses, signing, or executed copy | Section 9 |
+| Create or edit a precedent | Section 10 |
+| Prepare Word clause markers safely | Section 10, **Template File tab** |
+| Add conditional or repeated wording | Section 10, **Create a dynamic document section** |
+| Configure formatting, margins, spacing, or indentation | Section 10, **Formatting tab** |
+| Add and run automated precedent tests | Section 10, **Precedent quality assurance** |
+| Understand a QA warning, failure, or stale run | Section 10, **Run and interpret QA** |
+| Manage users and permissions | Section 11 |
+| Investigate who changed or accessed something | Section 12, **Audit Log** |
+| Change system-wide defaults | Section 13, **System Settings** |
+| Resolve a common operational problem | Section 14, **Troubleshooting** |
+| Complete daily operational checks | Section 16, **Daily operating checklist** |
 
 \newpage
 
@@ -52,6 +128,52 @@ After sign-in, the left navigation shows the areas available to your role:
 | **Profile menu** | Your details, password, avatar, and 2FA | Profile, notifications, Sign out |
 
 Common table controls include search, sortable column headings, filters, column visibility, pagination, and per-row actions. A dash (`—`) means no value or that the item is not applicable.
+
+### Annotated screen guides
+
+These maps identify the controls by function. The exact buttons visible depend on role, permission, request status, precedent configuration, and whether PDF conversion is available.
+
+#### Document Requests list
+
+| Area | What it does | Safe use |
+|---|---|---|
+| **A · Status tabs** | Switches between All, My Requests, In Progress, Needs Review, and Failed; badges show counts | Start with Needs Review or Failed when triaging work |
+| **B · Search and filters** | Narrows by title/matter, Status, Precedent, Client, and Approval | Clear old session filters if an expected request appears missing |
+| **C · New Document Request** | Opens the three-step request wizard | Use for one request; avoid double-submitting while generation runs |
+| **D · Batch tools** | Downloads a precedent-specific CSV template or validates/generates a batch | Review the validation preview before confirming generation |
+| **E · Request row** | Shows document/matter, client, requester, status, approval, and requested time | Select the row to open its full record |
+| **F · Actions menu** | Opens, previews, approves, or downloads according to current availability | Missing actions normally indicate status, approval, permission, or PDF availability |
+
+#### Document Request view
+
+| Area | What it does | Safe use |
+|---|---|---|
+| **A · Request summary** | Shows precedent, client, requester, matter reference, status, generation error, and approval | Confirm you opened the correct matter before viewing or downloading |
+| **B · Submitted Answers** | Preserves the values used for this generation | Compare against current instructions; do not assume client prefill was current |
+| **C · Preview/Download** | Opens PDF preview or downloads an available approved DOCX/PDF | Visually inspect the final format; preview is not approval |
+| **D · Approval** | Records an authorised review decision and unlocks downloads when required | Approve only after the firm's complete review procedure |
+| **E · Regenerate** | Starts a new request using the existing request as its source | Correct the new request and retain the original audit history |
+| **F · Signature/Witness areas** | Tracks sending, witnesses, signing, and executed-copy upload | Record actual external events; these controls do not send or sign a document |
+
+#### Precedent Edit
+
+| Area | What it does | Safe use |
+|---|---|---|
+| **A · Configuration tabs** | Details, Template File, Structure, Formatting, Questionnaire Fields, Client Mapping, and Party Groups | Save related configuration before testing it |
+| **B · Run QA** | Validates configuration and executes every active scenario | Open each issue; a count alone is not a diagnosis |
+| **C · Secondary actions** | Baseline, template download, duplicate, and CSV import tools | Duplicate before substantial experimental changes; imports do not create groups |
+| **D · Automated Test Scenarios** | Stores repeatable inputs and expected generated output | Use fictional data and paired branch scenarios |
+| **E · Quality Assurance Runs** | Shows status, issue preview, scenario result, stale state, runner, and time | Select View issues/report for the full evidence |
+| **F · Save changes** | Persists the editable form configuration | Unsaved changes are not included in a QA run |
+
+#### QA report
+
+| Area | Meaning | Response |
+|---|---|---|
+| **Validation issues** | Configuration or source-template errors/warnings, with severity and code | Correct errors; assess warnings; save and rerun |
+| **Scenario results** | Each scenario's pass/fail and exact unmet expectation or exception | Correct data, expectation, template, or generator as appropriate |
+| **Changes from baseline** | Before/after configuration differences since the approved reference | Confirm every change is intended and reviewed |
+| **Stale indicator** | The precedent/scenarios changed after that run | Do not rely on the old result; run QA again |
 
 ## 3. Sign in and account security
 
@@ -934,6 +1056,90 @@ Every saved precedent has two QA panels below its edit form: **Automated Test Sc
 
 Create paired scenarios for every conditional branch: Yes/No, value present/blank, one/many party rows, substitute/fallback paths, and boundary cases. Scenario execution occurs inside a rolled-back database transaction; it does not leave a real Document Request behind.
 
+##### Worked example: Power of Attorney with two attorneys
+
+Assume the saved precedent contains these technical names:
+
+- Questionnaire Fields: `principal_name`, `principal_address`, `is_enduring`, and `attorneys_act_jointly`
+- Party Group key: `attorneys`
+- Attorney fields: `name` and `address`
+
+The names must match the precedent configuration exactly, including underscores and singular/plural spelling. Labels such as **Principal's Full Name** are not valid JSON keys unless that exact text is also the configured technical name.
+
+Create this scenario:
+
+| Scenario input | Example value |
+|---|---|
+| Name | `Enduring POA — two attorneys acting jointly` |
+| Active | On |
+| Expected title | Enter the exact title normally produced by this precedent, or leave blank if the title is not being tested |
+
+Paste the following into **Answers (JSON object)**:
+
+```json
+{
+  "principal_name": "Jane Example",
+  "principal_address": "10 Example Street, Sydney NSW 2000",
+  "is_enduring": true,
+  "attorneys_act_jointly": true
+}
+```
+
+Paste the following into **Party rows (JSON object)**:
+
+```json
+{
+  "attorneys": [
+    {
+      "name": "Alex Example",
+      "address": "20 Sample Road, Sydney NSW 2000"
+    },
+    {
+      "name": "Morgan Example",
+      "address": "30 Test Avenue, Sydney NSW 2000"
+    }
+  ]
+}
+```
+
+In **Output must include**, add each phrase as a separate tag by typing it and pressing Enter. Choose short phrases that uniquely prove the intended branch and parties were generated, for example:
+
+- `Jane Example`
+- `Alex Example`
+- `Morgan Example`
+- `jointly`
+- a distinctive phrase from the enduring-authority clause
+
+In **Output must not include**, add a phrase that belongs only to the opposite branch, for example a distinctive phrase used when attorneys act separately. Do not use broad words such as `not`, `document`, or `attorney`; they may legitimately occur elsewhere and cause a false failure.
+
+Save the scenario, select **Run QA**, then scroll to **Quality Assurance Runs**. A passing result proves that this exact data set generated without an exception, produced the expected title if supplied, contained every include phrase, and contained none of the exclude phrases. It does not prove that the legal wording is correct; compare the generated wording with the approved precedent.
+
+##### Paired example: test the opposite conditional branch
+
+Duplicate the idea as a second scenario named `Non-enduring POA — attorneys acting separately`, but change the relevant Boolean answers:
+
+```json
+{
+  "principal_name": "Jane Example",
+  "principal_address": "10 Example Street, Sydney NSW 2000",
+  "is_enduring": false,
+  "attorneys_act_jointly": false
+}
+```
+
+Now reverse the branch-specific expectations: require a distinctive phrase from the non-enduring/separate-authority wording and exclude the phrase unique to the enduring/joint wording. Keep realistic Party rows. Testing only the `true` case does not prove the `false` branch works.
+
+##### JSON and expectation checklist
+
+- Use double quotes around JSON keys and text values; do not use Word-style curly quotation marks.
+- Use `true` and `false` without quotes for Boolean fields, numbers without quotes for numeric fields, and `null` for an intentionally empty value.
+- Use an empty object `{}` when the precedent has no party groups for that scenario. Do not paste comments into JSON.
+- Include every field required by the precedent and every party field needed by its generator. A scenario does not automatically copy client data.
+- Copy technical names from **Questionnaire Fields** and **Party Groups**; never guess them from the staff-facing label.
+- Expected phrases are case-sensitive and must appear in the generated text exactly as entered.
+- Use fictional QA data, not a real client's personal or matter information.
+- After changing the template, fields, party groups, clauses, formatting, or scenarios, save and run QA again; the earlier run becomes stale.
+
 #### Run and interpret QA
 
 Select **Run QA** at the top of Precedent Edit. The saved report has one of three statuses:
@@ -1566,6 +1772,42 @@ Select **System Settings**, change one or more tabs, then select **Save**. Appea
 
 - Configure From Name, From Address, and optional Staff Notification Email for generation-failure alerts.
 - Enter SMTP Host, Port, Username, Password, and TLS/SSL only for an approved mail provider. A blank host keeps the default non-delivery/log-style configuration.
+
+## Glossary {.unnumbered}
+
+| Term | Meaning in LawDocs |
+|---|---|
+| **Active precedent** | A precedent enabled for authorised users to select in the request wizard. Active does not mean solicitor-approved unless the firm's approval process says so. |
+| **Alias** | The short name assigned after `AS` in a repeat marker, used to reference fields on the current party row, such as `attorney.name`. |
+| **Approval** | A recorded human decision that a completed draft may be downloaded when the precedent requires review. It is not an automated legal check. |
+| **Audit Log** | Read-only history of configured record, access-control, authentication, and file events. It is not a recording of every screen view or mouse click. |
+| **Baseline** | A saved QA comparison reference containing the precedent configuration, scenario set, extracted template text, and source-file checksum at an approved review point. |
+| **Batch generation** | Creation of several independent Document Requests from a precedent-specific CSV file after validation and confirmation. |
+| **Clause marker** | Bracketed instruction in the source DOCX, such as `[[CLAUSE:revocation]]`, used to identify or control template content. |
+| **Client mapping** | Precedent-specific connection that copies selected Client attributes into matching questionnaire answers when a client and precedent are selected. |
+| **Completed** | Generation finished successfully. It does not mean the content is correct, reviewed, signed, or approved. |
+| **Computed block** | Generator-provided content referenced by a Structure entry rather than a named clause extracted from the DOCX. Availability depends on the selected generator. |
+| **Conditional flag** | A named true/false value used by `IF`/`ELSE` logic. It may come from an answer, presence of an optional value, or a specialist generator. |
+| **Document Request** | The permanent record of one generation attempt, including precedent/client links, submitted answer snapshot, party rows, status, output, and review/signature tracking. |
+| **Executed copy** | The signed document file uploaded after external signing. Uploading it records storage; LawDocs does not create or verify signatures. |
+| **Expected include/exclude** | Case-sensitive phrases an automated scenario requires to be present or absent in the generated text. |
+| **Generator** | The component that converts a request and precedent into structured draft content. **Template** is no-code; specialist generators may add document-specific logic. |
+| **Matter reference** | Optional firm filing identifier saved on a request. It is distinct from the internal request ID. |
+| **Party Group** | A repeatable collection of structured rows, such as attorneys, beneficiaries, guardians, or executors. |
+| **Placeholder** | A token inside template content, such as `{{answers.principal_name}}` or `{{attorney.name}}`, replaced with request data during generation. |
+| **Precedent** | The versioned configuration used to assemble a document: source DOCX, generator, clauses/structure, formatting, fields, mapping, parties, review rule, and tests. |
+| **Questionnaire Field** | A named single-value input shown on the request Details step. Its technical name is used by mappings, placeholders, flags, CSVs, and automated scenarios. |
+| **QA run** | A saved technical validation and execution of all active automated scenarios against the currently saved precedent. |
+| **Regenerate** | Creation of a new request based on an existing request so corrections can be made without overwriting the original history. |
+| **Repeat marker** | A template instruction that renders its contained elements once for every row in a Party Group. |
+| **Scenario** | A saved fictional input set with optional title and include/exclude expectations used for repeatable precedent testing. |
+| **Snapshot** | Preserved data as it existed for a particular record or event, such as answers submitted for a request or configuration captured by QA. |
+| **Stale QA run** | A prior QA result whose fingerprint no longer matches the current saved precedent or scenario configuration. It must not be relied upon as current evidence. |
+| **Structure** | Ordered list deciding which extracted clauses or computed blocks enter the generated document and under which conditions. |
+| **Technical name/key** | Stable machine-readable identifier such as `principal_name` or `attorneys`; it is different from the staff-facing label and should not be casually renamed. |
+| **Template generator** | The no-code generator that assembles uploaded clause content using Structure, questionnaire answers, party groups, conditions, and formatting configuration. |
+| **Template/source DOCX** | Private Word file uploaded to a precedent. It supplies extractable clause content and formatting; it is not itself the completed client document. |
+| **Witness tracking** | Record of intended witnesses and signing status. It does not verify identity, capacity, independence, witnessing compliance, or a signature. |
 
 ## 14. Troubleshooting
 
